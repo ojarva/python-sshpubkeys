@@ -5,6 +5,20 @@ This library validates OpenSSH public keys.
 
 Currently ssh-rsa, ssh-dss (DSA) and ecdsa-ssh keys with NIST curves is supported.
 
+Installation:
+
+::
+
+  pip install sshpubkeys
+
+or clone the repository and use
+
+::
+
+  python setup.py install
+
+Usage:
+
 ::
 
   import sshpubkeys

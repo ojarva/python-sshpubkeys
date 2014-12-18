@@ -21,11 +21,16 @@ class InvalidTypeException(InvalidKeyException):
 class MalformedDataException(InvalidKeyException):
     pass
 
-class SSHKey:
+class SSHKey(object):
     def __init__(self, keydata):
         self.keydata = keydata
         self.current_position = 0
         self.decoded_key = None
+        self.rsa = None
+        self.dsa = None
+        self.ecdsa = None
+        self.bits = None
+        self.keyt_type = None
         self.parse()
 
     def hash(self):
@@ -74,7 +79,7 @@ class SSHKey:
     def split_key(cls, data):
         key_parts = data.strip().split(None, 3)
         if len(key_parts) < 2: # Key type and content are mandatory fields.
-          raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
+            raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
         return key_parts       
 
     @classmethod
@@ -98,7 +103,7 @@ class SSHKey:
         # Check key type
         unpacked_key_type = self.unpack_by_int()
         if key_type != unpacked_key_type.decode():
-          raise InvalidTypeException("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
+            raise InvalidTypeException("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
 
         self.key_type = unpacked_key_type
 
@@ -139,8 +144,8 @@ class SSHKey:
 
             data = self.unpack_by_int()
 
-            key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
+            ecdsa_key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
             self.bits = int(curve_information.replace(b"nistp", b"")) # TODO
-            self.ecdsa = ecdsa
+            self.ecdsa = ecdsa_key
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)

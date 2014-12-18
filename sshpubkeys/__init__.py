@@ -1,8 +1,8 @@
 import base64
 import binascii
+import ecdsa
 import hashlib
 import struct
-import ecdsa
 import sys
 
 from Crypto.PublicKey import RSA, DSA
@@ -30,7 +30,7 @@ class SSHKey(object):
         self.dsa = None
         self.ecdsa = None
         self.bits = None
-        self.keyt_type = None
+        self.key_type = None
         self.parse()
 
     def hash(self):

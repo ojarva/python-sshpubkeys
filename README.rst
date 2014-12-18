@@ -11,7 +11,7 @@ Installation:
 
   pip install sshpubkeys
 
-or clone the repository and use
+or clone the `repository <https://github.com/ojarva/sshpubkeys>`_ and use
 
 ::
 
@@ -42,7 +42,7 @@ Exceptions
 Tests
 -----
 
-See "tests/" folder for unit tests. Use
+See "`tests/ <https://github.com/ojarva/sshpubkeys/tree/master/tests>`_" folder for unit tests. Use
 
 ::
 
@@ -54,4 +54,4 @@ or
 
   python3 setup.py test
 
-to run test suite. If you have keys that are not parsed properly, or malformed keys that raise incorrect exception, please send your *public key* to olli@jarva.fi, and I'll include it. Alternatively, open issue or make a pull request in github.
+to run test suite. If you have keys that are not parsed properly, or malformed keys that raise incorrect exception, please send your *public key* to olli@jarva.fi, and I'll include it. Alternatively, `create a new issue <https://github.com/ojarva/sshpubkeys/issues/new>`_ or make `a pull request <https://github.com/ojarva/sshpubkeys/compare>`_ in github.

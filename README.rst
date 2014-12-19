@@ -36,6 +36,7 @@ Exceptions
 - NotImplementedError if invalid ecdsa curve or unknown key type is encountered.
 - InvalidKeyException if any other error is encountered:
     - TooShortKeyException if key is too short (<768 bits for RSA, <1024 for DSA)
+    - TooLongKeyException if key is too long (>16384 for RSA, >1024 for DSA)
     - InvalidTypeException if key type ("ssh-rsa" in above example) does not match to what is included in base64 encoded data.
     - MalformedDataException if decoding and extracting the data fails.
 

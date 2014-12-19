@@ -15,6 +15,9 @@ class InvalidKeyException(Exception):
 class TooShortKeyException(InvalidKeyException):
     pass
 
+class TooLongKeyException(InvalidKeyException):
+    pass
+
 class InvalidTypeException(InvalidKeyException):
     pass
 
@@ -37,6 +40,8 @@ class SSHKey(object):
         """ Calculates fingerprint hash.
 
         Shamelessly copied from http://stackoverflow.com/questions/6682815/deriving-an-ssh-fingerprint-from-a-public-key-in-python
+
+        For specification, see RFC4716, section 4.
         """
         fp_plain = hashlib.md5(self.decoded_key).hexdigest()
         return ':'.join(a+b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
@@ -68,10 +73,10 @@ class SSHKey(object):
             ret = long(0)
             for byte in data:
                 ret = (ret << 8) + ord(byte)
-            return ret
-        ret = 0
-        for byte in data:
-            ret = (ret << 8) + byte
+        else:
+            ret = 0
+            for byte in data:
+                ret = (ret << 8) + byte
         return ret
 
 
@@ -80,7 +85,7 @@ class SSHKey(object):
         key_parts = data.strip().split(None, 3)
         if len(key_parts) < 2: # Key type and content are mandatory fields.
             raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
-        return key_parts       
+        return key_parts
 
     @classmethod
     def decode_key(cls, pubkey_content):
@@ -117,6 +122,10 @@ class SSHKey(object):
 
             self.rsa = RSA.construct((unpacked_n, unpacked_e))
             self.bits = self.rsa.size() + 1
+            if self.bits < 768:
+                raise TooShortKeyException("ssh-rsa keys can not be shorter than 768 bits (was %s)" % self.bits)
+            elif self.bits > 16384:
+                raise TooLongKeyException("ssh-rsa keys can not be longer than 16384 bits (was %s)" % self.bits)
 
         elif self.key_type == b"ssh-dss":
             data_fields = {}
@@ -128,8 +137,10 @@ class SSHKey(object):
 
             self.dsa = DSA.construct((data_fields["y"], data_fields["g"], data_fields["p"], data_fields["q"]))
             self.bits = self.dsa.size() + 1
-            if self.bits != 1024:
-                raise InvalidKeyException("ssh-dss keys must be 1024 bits (was %s)" % self.bits)
+            if self.bits < 1024:
+                raise TooShortKeyException("ssh-dss keys must be 1024 bits (was %s)" % self.bits)
+            elif self.bits > 1024:
+                raise TooLongKeyException("ssh-dss keys must be 1024 bits (was %s)" % self.bits)
 
         elif self.key_type.strip().startswith(b"ecdsa-sha"):
             curve_information = self.unpack_by_int()
@@ -149,3 +160,6 @@ class SSHKey(object):
             self.ecdsa = ecdsa_key
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
+
+        if self.current_position != len(self.decoded_key):
+            raise MalformedDataException("Leftover data: %s bytes" % (len(self.decoded_key) - self.current_position))

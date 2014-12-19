@@ -21,11 +21,11 @@ class TestKeys(unittest.TestCase):
 
     def check_fail(self, pubkey, expected_error):
         """ Checks that key check raises specified exception """
+        # Don't use with statement here - it does not work with Python 2.6 unittest module
         self.assertRaises(expected_error, SSHKey, pubkey)
  
 def loop_ok(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """
-
     for i, items in enumerate(keyset):
         def ch(pubkey, bits, fingerprint):
             return lambda self: self.check_key(pubkey, bits, fingerprint)

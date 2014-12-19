@@ -129,11 +129,8 @@ class SSHKey(object):
 
         elif self.key_type == b"ssh-dss":
             data_fields = {}
-            for expected_length, item in [(309, "p"), (48, "q"), (309, "g"), (309, "y")]:
+            for item in ("p", "q", "g", "y"):
                 data_fields[item] = self.parse_long(self.unpack_by_int())
-                item_length = len(str(data_fields[item]))
-                if item_length != expected_length:
-                    raise MalformedDataException("DSA parameter %s has invalid length (%s, expected %s)" % (item, item_length, expected_length))
 
             self.dsa = DSA.construct((data_fields["y"], data_fields["g"], data_fields["p"], data_fields["q"]))
             self.bits = self.dsa.size() + 1

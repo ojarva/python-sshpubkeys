@@ -1,6 +1,9 @@
 OpenSSH Public Key Parser for Python
 ====================================
 
+.. image: https://travis-ci.org/ojarva/sshpubkeys.svg?branch=master
+    :target: https://travis-ci.org/ojarva/sshpubkeys
+
 This library validates OpenSSH public keys.
 
 Currently ssh-rsa, ssh-dss (DSA) and ecdsa-ssh keys with NIST curves is supported.

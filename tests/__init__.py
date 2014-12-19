@@ -21,8 +21,7 @@ class TestKeys(unittest.TestCase):
 
     def check_fail(self, pubkey, expected_error):
         """ Checks that key check raises specified exception """
-        with self.assertRaises(expected_error):
-            ssh = SSHKey(pubkey)
+        self.assertRaises(expected_error, SSHKey, pubkey)
  
 def loop_ok(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """

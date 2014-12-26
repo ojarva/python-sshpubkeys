@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='sshpubkeys',
-    version='1.0.3',
+    version='1.0.4',
     description='SSH public key parser',
     long_description=long_description,
     url='https://github.com/ojarva/sshpubkeys',
@@ -32,7 +32,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    keywords='ssh pubkey public key openssh ssh-rsa ssh-dss',
+    keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
     packages=["sshpubkeys"],
     test_suite="tests",
     install_requires=['pycrypto>=2.6', 'ecdsa>=0.11'],

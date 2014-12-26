@@ -155,6 +155,15 @@ class SSHKey(object):
             ecdsa_key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
             self.bits = int(curve_information.replace(b"nistp", b"")) # TODO
             self.ecdsa = ecdsa_key
+        elif self.key_type == b"ssh-ed25519":
+            # There is no (apparent) way to validate ed25519 keys. This only
+            # checks data length (256 bits), but does not try to validate
+            # the key in any way.
+            verifying_key = self.unpack_by_int()
+            verifying_key_length = len(verifying_key)
+            if verifying_key_length != 32:
+                raise InvalidKeyException("ssh-ed25519 key data must be 256bits (was %s)" % verifying_key_length)
+            self.bits = verifying_key_length * 8
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
 

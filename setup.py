@@ -9,10 +9,10 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='sshpubkeys',
-    version='1.0.4',
+    version='1.0.5',
     description='SSH public key parser',
     long_description=long_description,
-    url='https://github.com/ojarva/sshpubkeys',
+    url='https://github.com/ojarva/python-sshpubkeys',
     author='Olli Jarva',
     author_email='olli@jarva.fi',
     license='BSD',

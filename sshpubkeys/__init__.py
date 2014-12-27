@@ -112,6 +112,8 @@ class SSHKey(object):
 
         self.key_type = unpacked_key_type
 
+        min_length = max_length = None
+
         if self.key_type == b"ssh-rsa":
 
             raw_e = self.unpack_by_int()
@@ -122,10 +124,9 @@ class SSHKey(object):
 
             self.rsa = RSA.construct((unpacked_n, unpacked_e))
             self.bits = self.rsa.size() + 1
-            if self.bits < 768:
-                raise TooShortKeyException("ssh-rsa keys can not be shorter than 768 bits (was %s)" % self.bits)
-            elif self.bits > 16384:
-                raise TooLongKeyException("ssh-rsa keys can not be longer than 16384 bits (was %s)" % self.bits)
+
+            min_length = 768
+            max_length = 16384
 
         elif self.key_type == b"ssh-dss":
             data_fields = {}
@@ -134,10 +135,8 @@ class SSHKey(object):
 
             self.dsa = DSA.construct((data_fields["y"], data_fields["g"], data_fields["p"], data_fields["q"]))
             self.bits = self.dsa.size() + 1
-            if self.bits < 1024:
-                raise TooShortKeyException("ssh-dss keys must be 1024 bits (was %s)" % self.bits)
-            elif self.bits > 1024:
-                raise TooLongKeyException("ssh-dss keys must be 1024 bits (was %s)" % self.bits)
+
+            min_length = max_length = 1024
 
         elif self.key_type.strip().startswith(b"ecdsa-sha"):
             curve_information = self.unpack_by_int()
@@ -161,13 +160,18 @@ class SSHKey(object):
             # the key in any way.
             verifying_key = self.unpack_by_int()
             verifying_key_length = len(verifying_key) * 8
-            if verifying_key_length < 256:
-                raise TooShortKeyException("ssh-ed25519 key data can not be shorter than 256 bits (was %s)" % verifying_key_length)
-            elif verifying_key_length > 256:
-                raise TooLongKeyException("ssh-ed25519 key data can not be longer than 256 bits (was %s)" % verifying_key_length)
+
+            min_length = max_length = 256
             self.bits = verifying_key_length
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
+
+        if min_length:
+            if self.bits < min_length:
+                raise TooShortKeyException("%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+        if max_length:
+            if self.bits > max_length:
+                raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, min_length, self.bits))
 
         if self.current_position != len(self.decoded_key):
             raise MalformedDataException("Leftover data: %s bytes" % (len(self.decoded_key) - self.current_position))

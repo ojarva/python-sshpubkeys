@@ -160,10 +160,12 @@ class SSHKey(object):
             # checks data length (256 bits), but does not try to validate
             # the key in any way.
             verifying_key = self.unpack_by_int()
-            verifying_key_length = len(verifying_key)
-            if verifying_key_length != 32:
-                raise InvalidKeyException("ssh-ed25519 key data must be 256bits (was %s)" % verifying_key_length)
-            self.bits = verifying_key_length * 8
+            verifying_key_length = len(verifying_key) * 8
+            if verifying_key_length < 256:
+                raise TooShortKeyException("ssh-ed25519 key data can not be shorter than 256 bits (was %s)" % verifying_key_length)
+            elif verifying_key_length > 256:
+                raise TooLongKeyException("ssh-ed25519 key data can not be longer than 256 bits (was %s)" % verifying_key_length)
+            self.bits = verifying_key_length
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
 

@@ -98,16 +98,27 @@ class SSHKey(object):
 
     def parse(self):
         self.current_position = 0
-        key_parts = self.split_key(self.keydata)
 
-        key_type = key_parts[0]
-        pubkey_content = key_parts[1]
+        if self.keydata.startswith("---- BEGIN SSH2 PUBLIC KEY ----"):
+            # SSH2 key format
+            key_type = None
+            pubkey_content = ""
+            for line in self.keydata.split("\n"):
+                if ":" in line: # key-value lines
+                    continue
+                if "----" in line: # begin/end lines
+                    continue
+                pubkey_content += line
+        else:
+            key_parts = self.split_key(self.keydata)
+            key_type = key_parts[0]
+            pubkey_content = key_parts[1]
 
         self.decoded_key = self.decode_key(pubkey_content)
 
         # Check key type
         unpacked_key_type = self.unpack_by_int()
-        if key_type != unpacked_key_type.decode():
+        if key_type is not None and key_type != unpacked_key_type.decode():
             raise InvalidTypeException("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
 
         self.key_type = unpacked_key_type
@@ -160,6 +171,10 @@ class SSHKey(object):
             # the key in any way.
             verifying_key = self.unpack_by_int()
             verifying_key_length = len(verifying_key) * 8
+            verifying_key = self.parse_long(verifying_key)
+
+            if verifying_key < 0:
+                raise InvalidKeyException("ed25519 verifying must be >0.")
 
             min_length = max_length = 256
             self.bits = verifying_key_length

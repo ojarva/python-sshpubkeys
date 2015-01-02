@@ -7,6 +7,7 @@ New test is generated for each key so that running unittests gives out meaningfu
 import unittest
 from sshpubkeys import *
 from .valid_keys import keys as list_of_valid_keys
+from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
 from .invalid_keys import keys as list_of_invalid_keys
 
 class TestKeys(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestKeys(unittest.TestCase):
         """ Checks that key check raises specified exception """
         # Don't use with statement here - it does not work with Python 2.6 unittest module
         self.assertRaises(expected_error, SSHKey, pubkey)
- 
+
 def loop_valid(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """
     for i, items in enumerate(keyset):
@@ -44,6 +45,7 @@ def loop_invalid(keyset, prefix):
         setattr(TestKeys, "test_%s" % prefix_tmp, ch(pubkey, expected_error))
 
 loop_valid(list_of_valid_keys, "valid_key")
+loop_valid(list_of_valid_keys_rfc4716, "valid_key_rfc4716")
 loop_invalid(list_of_invalid_keys, "invalid_key")
 
 if __name__ == '__main__':

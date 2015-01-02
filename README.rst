@@ -4,8 +4,8 @@ OpenSSH Public Key Parser for Python
 .. image:: https://travis-ci.org/ojarva/python-sshpubkeys.svg?branch=master
     :target: https://travis-ci.org/ojarva/python-sshpubkeys
 
-.. image:: https://coveralls.io/repos/ojarva/python-sshpubkeys/badge.png
-    :target: https://coveralls.io/r/ojarva/python-sshpubkeys
+.. image:: https://pypip.in/v/sshpubkeys/badge.png
+    :target: https://pypi.python.org/pypi/sshpubkeys
 
 This library validates OpenSSH public keys.
 

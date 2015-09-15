@@ -161,8 +161,10 @@ class SSHKey(object):
             curve, hash_algorithm = curve_data[curve_information]
 
             data = self.unpack_by_int()
-
-            ecdsa_key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
+            try:
+                ecdsa_key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
+            except AssertionError:
+                raise InvalidKeyException("Invalid ecdsa key")  
             self.bits = int(curve_information.replace(b"nistp", b"")) # TODO
             self.ecdsa = ecdsa_key
         elif self.key_type == b"ssh-ed25519":

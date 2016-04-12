@@ -1,15 +1,15 @@
-from setuptools import setup, find_packages
-from codecs import open
+from setuptools import setup
+from codecs import open as codecs_open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with codecs_open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name='sshpubkeys',
-    version='1.0.6',
+    version='1.0.7',
     description='SSH public key parser',
     long_description=long_description,
     url='https://github.com/ojarva/python-sshpubkeys',
@@ -31,14 +31,15 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
     packages=["sshpubkeys"],
     test_suite="tests",
-    install_requires=['pycrypto>=2.6', 'ecdsa>=0.11'],
+    install_requires=['pycrypto>=2.6', 'ecdsa>=0.13'],
 
-    extras_require = {
+    extras_require={
         'dev': ['twine', 'wheel'],
     },
 )

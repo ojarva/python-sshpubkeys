@@ -1,2 +1,2 @@
-ecdsa==0.11
+ecdsa==0.13
 pycrypto==2.6.1

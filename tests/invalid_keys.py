@@ -11,6 +11,8 @@ keys = [
  ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAH0GODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNA=", TooShortKeyException, "too_short_ed25519"],
  ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIUGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDDpA==", TooLongKeyException, "too_long_ed25519"],
 
+ ["ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBE2gqbAChP2h3fTPx3Jy2KdOJUiBGEiqBUwoosfzllw+KrqmGiDEWlufSxdiSOFuLd4a8PSwhoWbdQgRVFrZAvFE=", InvalidKeyException, "invalid_ecdsa_key"],
+
  ["ecdsa-sha2-nistp255 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTUAAAAIbmlzdHAyNTUAAABBBE2gqbAChP2h3fTPx3Jy2KdOJUiBGEiqBUwoosfzllw+KrqmGiDEWlufSxdiSOFuLd4a8PSwhoWbdQRVFrZAvFE=", NotImplementedError, "invalid_nist_curve"],
  ["", InvalidKeyException, "empty_key"],
  ["- -", MalformedDataException, "no_content"],

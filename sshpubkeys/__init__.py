@@ -141,6 +141,18 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
     @classmethod
     def _split_key(cls, data):
+        # Terribly inefficient way to remove options, but hey, it works.
+        if not data.startswith("ssh-") and not data.startswith("ecdsa-"):
+            quote_open = False
+            for i in range(len(data)):
+                if data[i] == '"':  # only double quotes are allowed, no need to care about single quotes
+                    quote_open = not quote_open
+                if quote_open:
+                    continue
+                if data[i] == " ":
+                    # Data begins after the first space
+                    data = data[i + 1:]
+                    break
         key_parts = data.strip().split(None, 3)
         if len(key_parts) < 2:  # Key type and content are mandatory fields.
             raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
@@ -152,7 +164,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         try:
             decoded_key = base64.b64decode(pubkey_content.encode("ascii"))
         except (TypeError, binascii.Error):
-            raise InvalidKeyException("Unable to decode the key")
+            raise MalformedDataException("Unable to decode the key")
         return decoded_key
 
     @classmethod

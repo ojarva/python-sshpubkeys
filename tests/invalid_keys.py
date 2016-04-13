@@ -23,5 +23,6 @@ keys = [
     # 512 bit ed25519 keys are not yet supported by OpenSSH
     ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAQIMcGCUjHYKD/rfvSGiNSB1ij8hScTB7e1bo3XK2oaGGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", InvalidKeyLengthException, "512bit_ed25519"],
     ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAQIBBAIDAICBAgEABACAggGCgAABAwOEAwGBAgEEg4SBAAKBBIGEAgSEgAIEgoMCgICAgYMCgYQDgoKBgIIDgwCA=", InvalidKeyLengthException, "512bit_ed25519"],
+    ['command="dump /home,no-pty,no-port-forwarding ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABADR9kolU4uiD26LMrbakQlNf4QWB2xrdY3nASf6CJdQYzTMjNmbt6sJ4A4pGnCupFrzL04EYDvbVmT4GEZm6CU4BsY61yosnpGSqqcVCdw5xW1k4bCSDPW75WHLCVmYyROhZ+yyo8uAcIy5UIyBZXF/PO7taJrrIi5RwdqIPwtCrJ3dJkcFWa3qZWJykLAFQD5A/lta/egS/u/nyCap2e16WGnvSluz9CyYtGFNS9axzOwHxLFEv2ocOsJjYgzV+Jfpiao94A4VzLKbUDHlfV57KS0tJaT8FKKsg34vN3bsD0zUftLUPpUFgJfMwje0C2rCJkCzwgya2vxLqj2fg0Q0= ojarva@ojar-laptop.local', MalformedDataException, "missing_quote"],
 
 ]

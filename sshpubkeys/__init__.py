@@ -117,7 +117,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     def hash_sha256(self):
         """ Calculates sha256 fingerprint. """
         fp_plain = hashlib.sha256(self.decoded_key).digest()
-        return "SHA256:" + base64.b64encode(fp_plain).replace(b"=", b"")
+        return (b"SHA256:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
 
     def _unpack_by_int(self):
         """ Returns next data field. """

@@ -21,6 +21,7 @@ import hashlib
 import struct
 import sys
 import base64
+import warnings
 import binascii
 import ecdsa
 
@@ -68,9 +69,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
     VALID_DSA_PARAMETERS = [
         (1024, 160),
-        (2048, 224),
-        (2048, 256),
-        (3072, 256),
+        (2048, 160),
+        (3072, 160),
     ]
 
     ECDSA_CURVE_DATA = {
@@ -97,7 +97,15 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.parse()
 
     def hash(self):
-        """ Calculates fingerprint hash.
+        """ Calculates md5 fingerprint.
+
+        Deprecated, use .hash_md5() instead.
+        """
+        warnings.warn("hash() is deprecated. Use hash_md5() or hash_sha256() instead.")
+        return self.hash_md5()
+
+    def hash_md5(self):
+        """ Calculates md5 fingerprint.
 
         Shamelessly copied from http://stackoverflow.com/questions/6682815/deriving-an-ssh-fingerprint-from-a-public-key-in-python
 
@@ -105,6 +113,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         """
         fp_plain = hashlib.md5(self.decoded_key).hexdigest()
         return ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
+
+    def hash_sha256(self):
+        """ Calculates sha256 fingerprint. """
+        fp_plain = hashlib.sha256(self.decoded_key).digest()
+        return "SHA256:" + base64.b64encode(fp_plain).replace(b"=", b"")
 
     def _unpack_by_int(self):
         """ Returns next data field. """
@@ -211,10 +224,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
         data = self._unpack_by_int()
         try:
+            # data starts with \x04, which should be discarded.
             ecdsa_key = ecdsa.VerifyingKey.from_string(data[1:], curve, hash_algorithm)
         except AssertionError:
             raise InvalidKeyException("Invalid ecdsa key")
-        self.bits = int(curve_information.replace(b"nistp", b""))  # TODO
+        self.bits = int(curve_information.replace(b"nistp", b""))  # TODO: this is rather ugly way to extract bit length
         self.ecdsa = ecdsa_key
 
     def _process_ed25516(self):
@@ -233,8 +247,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             raise InvalidKeyException("ed25519 verifying key must be >0.")
 
         self.bits = verifying_key_length
-        if self.bits not in (512, 256):
-            raise InvalidKeyLengthException("ed25519 keys must be 256 or 512 bits (was %s bits)" % self.bits)
+        if self.bits != 256:
+            raise InvalidKeyLengthException("ed25519 keys must be 256 bits (was %s bits)" % self.bits)
 
     def _process_key(self):
         if self.key_type == b"ssh-rsa":

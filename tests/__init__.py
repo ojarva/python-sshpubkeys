@@ -12,11 +12,13 @@ from .invalid_keys import keys as list_of_invalid_keys
 
 
 class TestKeys(unittest.TestCase):
-    def check_key(self, pubkey, bits, fingerprint):
+    def check_key(self, pubkey, bits, fingerprint_md5, fingerprint_sha256):
         """ Checks valid key """
         ssh = SSHKey(pubkey)
         self.assertEqual(ssh.bits, bits)
-        self.assertEqual(ssh.hash(), fingerprint)
+        self.assertEqual(ssh.hash_md5(), fingerprint_md5)
+        if fingerprint_sha256 is not None:
+            self.assertEqual(ssh.hash_sha256(), fingerprint_sha256)
 
     def check_fail(self, pubkey, expected_error):
         """ Checks that key check raises specified exception """
@@ -27,13 +29,12 @@ class TestKeys(unittest.TestCase):
 def loop_valid(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """
     for i, items in enumerate(keyset):
-        def ch(pubkey, bits, fingerprint):
-            return lambda self: self.check_key(pubkey, bits, fingerprint)
+        def ch(pubkey, bits, fingerprint_md5, fingerprint_sha256):
+            return lambda self: self.check_key(pubkey, bits, fingerprint_md5, fingerprint_sha256)
         prefix_tmp = "%s_%s" % (prefix, i)
-        if len(items) == 4:  # If there is an extra item, use that as test name.
-            prefix_tmp = items.pop()
-        pubkey, bits, fingerprint = items
-        setattr(TestKeys, "test_%s" % prefix_tmp, ch(pubkey, bits, fingerprint))
+        prefix_tmp = items.pop()
+        pubkey, bits, fingerprint_md5, fingerprint_sha256 = items
+        setattr(TestKeys, "test_%s" % prefix_tmp, ch(pubkey, bits, fingerprint_md5, fingerprint_sha256))
 
 
 def loop_invalid(keyset, prefix):

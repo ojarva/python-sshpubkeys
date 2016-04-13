@@ -32,8 +32,9 @@ Usage:
         "dfybgtAR1ow3Qkb9GPQ6wkFHQqcFDe6faKCxH6iDRteo4D8L8B"
         "xwzN42uZSB0nfmjkIxFTcEU3mFSXEbWByg78aoddMrAAjatyrh"
         "H1pON6P0= ojarva@ojar-laptop")
-  print(ssh.bits) # 768
-  print(ssh.hash()) # 56:84:1e:90:08:3b:60:c7:29:70:5f:5e:25:a6:3b:86
+  print(ssh.bits)  # 768
+  print(ssh.hash_md5())  # 56:84:1e:90:08:3b:60:c7:29:70:5f:5e:25:a6:3b:86
+  print(ssh.hash_sha256())  # SHA256:xk3IEJIdIoR9MmSRXTP98rjDdZocmXJje/28ohMQEwM
 
 
 Exceptions

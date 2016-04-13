@@ -97,7 +97,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.parse()
 
     def hash(self):
-        """ Calculates md5 fingerprint.
+        """ Calculate md5 fingerprint.
 
         Deprecated, use .hash_md5() instead.
         """
@@ -105,7 +105,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return self.hash_md5()
 
     def hash_md5(self):
-        """ Calculates md5 fingerprint.
+        """ Calculate md5 fingerprint.
 
         Shamelessly copied from http://stackoverflow.com/questions/6682815/deriving-an-ssh-fingerprint-from-a-public-key-in-python
 
@@ -115,9 +115,14 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
 
     def hash_sha256(self):
-        """ Calculates sha256 fingerprint. """
+        """ Calculate sha256 fingerprint. """
         fp_plain = hashlib.sha256(self.decoded_key).digest()
         return (b"SHA256:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
+
+    def hash_sha512(self):
+        """ Calculates sha512 fingerprint. """
+        fp_plain = hashlib.sha512(self.decoded_key).digest()
+        return (b"SHA512:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
 
     def _unpack_by_int(self):
         """ Returns next data field. """

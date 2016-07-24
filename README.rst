@@ -7,7 +7,7 @@ OpenSSH Public Key Parser for Python
 .. image:: https://pypip.in/v/sshpubkeys/badge.png
     :target: https://pypi.python.org/pypi/sshpubkeys
 
-This library validates OpenSSH public keys.
+Native implementation for validating OpenSSH public keys.
 
 Currently ssh-rsa, ssh-dss (DSA), ssh-ed25519 and ecdsa keys with NIST curves are supported.
 
@@ -27,15 +27,31 @@ Usage:
 
 ::
 
+  import sys
   from sshpubkeys import SSHKey
+
   ssh = SSHKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAYQCxO38tKAJXIs9ivPxt7AY"
         "dfybgtAR1ow3Qkb9GPQ6wkFHQqcFDe6faKCxH6iDRteo4D8L8B"
         "xwzN42uZSB0nfmjkIxFTcEU3mFSXEbWByg78aoddMrAAjatyrh"
-        "H1pON6P0= ojarva@ojar-laptop")
+        "H1pON6P0= ojarva@ojar-laptop", strict_mode=True)
+  try:
+      ssh.parse()
+  except InvalidKeyException as err:
+      print("Invalid key:", err)
+      sys.exit(1)
+  except NotImplementedError as err:
+      print("Invalid key type:", err)
+      sys.exit(1)
+
   print(ssh.bits)  # 768
   print(ssh.hash_md5())  # 56:84:1e:90:08:3b:60:c7:29:70:5f:5e:25:a6:3b:86
   print(ssh.hash_sha256())  # SHA256:xk3IEJIdIoR9MmSRXTP98rjDdZocmXJje/28ohMQEwM
   print(ssh.hash_sha512())  # SHA512:1C3lNBhjpDVQe39hnyy+xvlZYU3IPwzqK1rVneGavy6O3/ebjEQSFvmeWoyMTplIanmUK1hmr9nA8Skmj516HA
+
+Options
+-------
+
+- strict_mode: if set to True, disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
 
 Exceptions
 ----------

@@ -63,15 +63,20 @@ class MalformedDataException(InvalidKeyException):
 
 class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     """
-    ssh_key = SSHKey(key_data)
+    ssh_key = SSHKey(key_data, strict=True)
     ssh_key.parse()
+
+    strict=True (default) only allows keys ssh-keygen generates. Setting strict mode to false allows
+    all keys OpenSSH actually accepts, including highly insecure ones. For example, OpenSSH accepts
+    512-bit DSA keys and 64-bit RSA keys which are highly insecure.
     """
 
-    VALID_DSA_PARAMETERS = [
-        (1024, 160),
-        (2048, 160),
-        (3072, 160),
-    ]
+    DSA_MIN_LENGTH_STRICT = 1024
+    DSA_MAX_LENGTH_STRICT = 1024
+    DSA_MIN_LENGTH_LOOSE = 1
+    DSA_MAX_LENGTH_LOOSE = 16384
+
+    DSA_N_LENGTH = 160
 
     ECDSA_CURVE_DATA = {
         b"nistp256": (ecdsa.curves.NIST256p, hashlib.sha256),
@@ -81,11 +86,14 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         b"nistp521": (ecdsa.curves.NIST521p, hashlib.sha512),
     }
 
-    RSA_MIN_LENGTH = 768
-    RSA_MAX_LENGTH = 16384
+    RSA_MIN_LENGTH_STRICT = 1024
+    RSA_MAX_LENGTH_STRICT = 16384
+    RSA_MIN_LENGTH_LOOSE = 768
+    RSA_MAX_LENGTH_LOOSE = 16384
+
     INT_LEN = 4
 
-    def __init__(self, keydata):
+    def __init__(self, keydata, **kwargs):
         self.keydata = keydata
         self.current_position = 0
         self.decoded_key = None
@@ -94,7 +102,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.ecdsa = None
         self.bits = None
         self.key_type = None
-        self.parse()
+        self.strict_mode = bool(kwargs.get("strict", True))
+        try:
+            self.parse()
+        except (InvalidKeyException, NotImplementedError):
+            pass
 
     def hash(self):
         """ Calculate md5 fingerprint.
@@ -102,7 +114,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         Deprecated, use .hash_md5() instead.
         """
         warnings.warn("hash() is deprecated. Use hash_md5() or hash_sha256() instead.")
-        return self.hash_md5()
+        return self.hash_md5().replace(b"MD5:", b"")
 
     def hash_md5(self):
         """ Calculate md5 fingerprint.
@@ -112,7 +124,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         For specification, see RFC4716, section 4.
         """
         fp_plain = hashlib.md5(self.decoded_key).hexdigest()
-        return ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
+        return "MD5:" + ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
 
     def hash_sha256(self):
         """ Calculate sha256 fingerprint. """
@@ -171,6 +183,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                     # Data begins after the first space
                     data = data[i + 1:]
                     break
+            else:
+                raise MalformedDataException("Couldn't find beginning of the key data")
         key_parts = data.strip().split(None, 3)
         if len(key_parts) < 2:  # Key type and content are mandatory fields.
             raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
@@ -200,10 +214,16 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.rsa = RSA.construct((unpacked_n, unpacked_e))
         self.bits = self.rsa.size() + 1
 
-        if self.bits < self.RSA_MIN_LENGTH:
+        if self.strict_mode:
+            min_length = self.RSA_MIN_LENGTH_STRICT
+            max_length = self.RSA_MAX_LENGTH_STRICT
+        else:
+            min_length = self.RSA_MIN_LENGTH_LOOSE
+            max_length = self.RSA_MAX_LENGTH_LOOSE
+        if self.bits < min_length:
             raise TooShortKeyException("%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
-        if self.bits > self.RSA_MAX_LENGTH:
-            raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+        if self.bits > max_length:
+            raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
 
     def _process_ssh_dss(self):
         """ Parses ssh-dsa public keys """
@@ -215,10 +235,18 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.bits = self.dsa.size() + 1
 
         q_bits = self._bits_in_number(data_fields["q"])
-        for p, q in self.VALID_DSA_PARAMETERS:
-            if self.bits == p and q_bits == q:
-                return
-        raise InvalidKeyException("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
+        if q_bits != self.DSA_N_LENGTH:
+            raise InvalidKeyException("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
+        if self.strict_mode:
+            min_length = self.DSA_MIN_LENGTH_STRICT
+            max_length = self.DSA_MAX_LENGTH_STRICT
+        else:
+            min_length = self.DSA_MIN_LENGTH_LOOSE
+            max_length = self.DSA_MAX_LENGTH_LOOSE
+        if self.bits < min_length:
+            raise TooShortKeyException("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+        if self.bits > max_length:
+            raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
 
     def _process_ecdsa_sha(self):
         """ Parses ecdsa-sha public keys """

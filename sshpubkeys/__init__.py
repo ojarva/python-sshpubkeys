@@ -101,6 +101,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.dsa = None
         self.ecdsa = None
         self.bits = None
+        self.comment = None
+        self.options = None
         self.key_type = None
         self.strict_mode = bool(kwargs.get("strict", True))
         try:
@@ -169,8 +171,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                 ret = (ret << 8) + byte
         return ret
 
-    @classmethod
-    def _split_key(cls, data):
+    def _split_key(self, data):
         # Terribly inefficient way to remove options, but hey, it works.
         if not data.startswith("ssh-") and not data.startswith("ecdsa-"):
             quote_open = False
@@ -181,13 +182,17 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                     continue
                 if data[i] == " ":
                     # Data begins after the first space
+                    self.options = data[:i]
                     data = data[i + 1:]
                     break
             else:
                 raise MalformedDataException("Couldn't find beginning of the key data")
-        key_parts = data.strip().split(None, 3)
+        key_parts = data.strip().split(None, 2)
         if len(key_parts) < 2:  # Key type and content are mandatory fields.
             raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
+        if len(key_parts) == 3:
+            self.comment = key_parts[2]
+            key_parts = key_parts[0:2]
         return key_parts
 
     @classmethod
@@ -302,9 +307,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
         Populates key_type, bits and bits fields.
 
-        For rsa keys, see rsa field for raw public key data.
-        For dsa keys, see dsa.
-        For ecdsa keys, see ecdsa. """
+        For rsa keys, see field "rsa" for raw public key data.
+        For dsa keys, see field "dsa".
+        For ecdsa keys, see field "ecdsa". """
         self.current_position = 0
 
         if self.keydata.startswith("---- BEGIN SSH2 PUBLIC KEY ----"):

@@ -64,6 +64,10 @@ Exceptions
     - TooLongKeyException if key is too long (>16384 for RSA, >1024 for DSA, >256 for ED25519)
     - InvalidTypeException if key type ("ssh-rsa" in above example) does not match to what is included in base64 encoded data.
     - MalformedDataException if decoding and extracting the data fails.
+    - InvalidOptionsException if options string is invalid.
+        - InvalidOptionNameException if option name contains invalid characters.
+            - UnknownOptionNameException if option name is not recognized.
+        - MissingMandatoryOptionValueException if option needs to have parameter, but it is absent.
 
 Tests
 -----

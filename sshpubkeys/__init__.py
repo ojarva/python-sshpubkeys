@@ -17,48 +17,20 @@ print(ssh_key.bits)
 
 """
 
+import base64
+import binascii
 import hashlib
+import re
 import struct
 import sys
-import base64
 import warnings
-import binascii
 import ecdsa
 
 from Crypto.PublicKey import RSA, DSA
 
+from .exceptions import *
 
-__all__ = ["InvalidKeyException", "InvalidKeyLengthException", "TooShortKeyException", "TooLongKeyException", "InvalidTypeException", "MalformedDataException", "SSHKey"]
-
-
-class InvalidKeyException(Exception):
-    """ Key is invalid. """
-    pass
-
-
-class InvalidKeyLengthException(InvalidKeyException):
-    """ Invalid key length """
-    pass
-
-
-class TooShortKeyException(InvalidKeyLengthException):
-    """ Key is shorter than what specification allows """
-    pass
-
-
-class TooLongKeyException(InvalidKeyLengthException):
-    """ Key is longer than what specification allows """
-    pass
-
-
-class InvalidTypeException(InvalidKeyException):
-    """ Key type is invalid """
-    pass
-
-
-class MalformedDataException(InvalidKeyException):
-    """ Key is invalid - unable to read the data """
-    pass
+__all__ = ["SSHKey"]
 
 
 class SSHKey(object):  # pylint:disable=too-many-instance-attributes
@@ -91,9 +63,33 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     RSA_MIN_LENGTH_LOOSE = 768
     RSA_MAX_LENGTH_LOOSE = 16384
 
+    # Valid as of OpenSSH_6.9p1
+    # argument name, value is mandatory. Options are case-insensitive, but this list must be in lowercase.
+    OPTIONS_SPEC = [
+        ("agent-forwarding", False),
+        ("cert-authority", False),
+        ("command", True),
+        ("environment", True),
+        ("from", True),
+        ("no-agent-forwarding", False),
+        ("no-port-forwarding", False),
+        ("no-pty", False),
+        ("no-user-rc", False),
+        ("no-x11-forwarding", False),
+        ("permitopen", True),
+        ("port-forwarding", False),
+        ("principals", True),
+        ("pty", False),
+        ("restrict", False),
+        ("tunnel", True),
+        ("user-rc", False),
+        ("x11-forwarding", False),
+    ]
+    OPTION_NAME_RE = re.compile("^[A-Za-z0-9-]+$")
+
     INT_LEN = 4
 
-    def __init__(self, keydata, **kwargs):
+    def __init__(self, keydata=None, **kwargs):
         self.keydata = keydata
         self.current_position = 0
         self.decoded_key = None
@@ -103,12 +99,15 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.bits = None
         self.comment = None
         self.options = None
+        self.options_raw = None
         self.key_type = None
         self.strict_mode = bool(kwargs.get("strict", True))
-        try:
-            self.parse()
-        except (InvalidKeyException, NotImplementedError):
-            pass
+        self.skip_option_parsing = bool(kwargs.get("skip_option_parsing", False))
+        if keydata:
+            try:
+                self.parse(keydata)
+            except (InvalidKeyException, NotImplementedError):
+                pass
 
     def hash(self):
         """ Calculate md5 fingerprint.
@@ -172,6 +171,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return ret
 
     def _split_key(self, data):
+        options_raw = None
         # Terribly inefficient way to remove options, but hey, it works.
         if not data.startswith("ssh-") and not data.startswith("ecdsa-"):
             quote_open = False
@@ -182,7 +182,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                     continue
                 if data[i] == " ":
                     # Data begins after the first space
-                    self.options = data[:i]
+                    options_raw = data[:i]
                     data = data[i + 1:]
                     break
             else:
@@ -193,6 +193,14 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         if len(key_parts) == 3:
             self.comment = key_parts[2]
             key_parts = key_parts[0:2]
+        if options_raw and not self.skip_option_parsing:
+            # Populate and parse options field.
+            self.options_raw = options_raw
+            self.options = self.parse_options(self.options_raw)
+        else:
+            # Set empty defaults for fields
+            self.options_raw = None
+            self.options = {}
         return key_parts
 
     @classmethod
@@ -207,6 +215,51 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     @classmethod
     def _bits_in_number(cls, number):
         return len(format(number, "b"))
+
+    def parse_options(self, options):
+
+        quote_open = False
+        parsed_options = {}
+
+        def parse_add_single_option(opt):
+            if "=" in opt:
+                opt_name, opt_value = opt.split("=", 1)
+                opt_value = opt_value.replace('"', '')
+            else:
+                opt_name = opt
+                opt_value = True
+            if " " in opt_name or not self.OPTION_NAME_RE.match(opt_name):
+                raise InvalidOptionNameException
+            if self.strict_mode:
+                for valid_opt_name, value_required in self.OPTIONS_SPEC:
+                    if opt_name.lower() == valid_opt_name:
+                        if value_required and opt_value is True:
+                            raise MissingMandatoryOptionValueException
+                        break
+                else:
+                    raise UnknownOptionNameException
+            if opt_name not in parsed_options:
+                parsed_options[opt_name] = []
+            parsed_options[opt_name].append(opt_value)
+
+        start_of_current_opt = 0
+        i = 1  # Need to be set for empty options strings
+        for i in range(len(options)):
+            if options[i] == '"':  # only double quotes are allowed, no need to care about single quotes
+                quote_open = not quote_open
+            if quote_open:
+                continue
+            if options[i] == ",":
+                opt = options[start_of_current_opt:i]
+                parse_add_single_option(opt)
+                start_of_current_opt = i + 1
+                # Data begins after the first space
+        if start_of_current_opt + 1 != i:
+            opt = options[start_of_current_opt:]
+            parse_add_single_option(opt)
+        if quote_open:
+            raise InvalidOptionsException
+        return parsed_options
 
     def _process_ssh_rsa(self):
         """ Parses ssh-rsa public keys """
@@ -300,7 +353,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         else:
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
 
-    def parse(self):
+    def parse(self, keydata=None):
         """ Validates SSH public key
 
         Throws exception for invalid keys. Otherwise returns None.
@@ -311,19 +364,21 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         For dsa keys, see field "dsa".
         For ecdsa keys, see field "ecdsa". """
         self.current_position = 0
+        if keydata is None:
+            keydata = self.keydata
 
-        if self.keydata.startswith("---- BEGIN SSH2 PUBLIC KEY ----"):
+        if keydata.startswith("---- BEGIN SSH2 PUBLIC KEY ----"):
             # SSH2 key format
             key_type = None
             pubkey_content = ""
-            for line in self.keydata.split("\n"):
+            for line in keydata.split("\n"):
                 if ":" in line:  # key-value lines
                     continue
                 if "----" in line:  # begin/end lines
                     continue
                 pubkey_content += line
         else:
-            key_parts = self._split_key(self.keydata)
+            key_parts = self._split_key(keydata)
             key_type = key_parts[0]
             pubkey_content = key_parts[1]
 

@@ -199,10 +199,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         if len(key_parts) == 3:
             self.comment = key_parts[2]
             key_parts = key_parts[0:2]
-        if options_raw and not self.skip_option_parsing:
+        if options_raw:
             # Populate and parse options field.
             self.options_raw = options_raw
-            self.options = self.parse_options(self.options_raw)
+            if not self.skip_option_parsing:
+                self.options = self.parse_options(self.options_raw)
         else:
             # Set empty defaults for fields
             self.options_raw = None

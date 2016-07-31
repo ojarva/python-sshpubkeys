@@ -17,7 +17,7 @@ class TestMisc(unittest.TestCase):
 
     def test_none_to_constructor(self):
         ssh = SSHKey(None)
-        self.assertIsNone(ssh.keydata)
+        self.assertEqual(None, ssh.keydata)  # Python2.6 does not have assertIsNone
         self.assertRaises(ValueError, ssh.parse)
 
 

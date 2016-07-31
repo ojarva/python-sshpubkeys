@@ -1,4 +1,4 @@
-from sshpubkeys import *  # import errors
+from sshpubkeys.exceptions import *  # import errors
 
 keys = [
     ["ssh-dss AAAAB3NzaC1kc3MAAACBAPlHIP5sD+T8/Sx1DGEiCzCXqpl7ww40jBg7wTkxu44OH6pNog5PjJt5M4NBULhKva/i+bhIM3ba+H1Or+aHWWFHACV6W2FCGk/k37ApRF8sIa4hsnN0P9qn6VfhbJKee+DBxa21WjjY/MZiljmJz7IQHx5RTxX9I/hJ7cL+aNmrAAAAFQCKteqc4IkgIrjpcpStsxYAhb3MqQAAAIEA+SfIKuTr7QPcinsZQDdmZOXqcg+u9TLzHA4c47y0Kns3T3BVPr9rWdmuh6eImzLO4wMLxLvcg3ecrqFuiCp1IHvXENkGlpB17S+uOXlVDY+sTdXyvYKRKirg5IZefIAP/m08c0QGkhFDbo4ysr9D5gXgH3LB2rMPIAbvMWm/HZQAAACBAKWtAE3hXRQX5KtI4AoIWVTly/6T4JNBt4u24ZRqV7X//CZEZ0cS5YpR/frlpUDI3WKoMtS+VmT3cBFZINashIxZyfBF8+0UX3s34HwNfp0hDW3ZdgZJU56GC2eclMantYGeVrMxgTQd80pxZFgByEhoXGeZaAwUzN8ULo9jHQo=", MalformedDataException, "too_short_data", ["loose", "strict"]],

@@ -9,6 +9,8 @@ from sshpubkeys import *
 from .valid_keys import keys as list_of_valid_keys
 from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
 from .invalid_keys import keys as list_of_invalid_keys
+from .valid_options import options as list_of_valid_options
+from .invalid_options import options as list_of_invalid_options
 
 
 class TestKeys(unittest.TestCase):
@@ -18,7 +20,7 @@ class TestKeys(unittest.TestCase):
         ssh.parse()
         self.assertEqual(ssh.bits, bits)
         self.assertEqual(ssh.hash_md5(), fingerprint_md5)
-        self.assertEqual(ssh.options, options)
+        self.assertEqual(ssh.options_raw, options)
         self.assertEqual(ssh.comment, comment)
         if fingerprint_sha256 is not None:
             self.assertEqual(ssh.hash_sha256(), fingerprint_sha256)
@@ -28,6 +30,34 @@ class TestKeys(unittest.TestCase):
         # Don't use with statement here - it does not work with Python 2.6 unittest module
         ssh_key = SSHKey(pubkey, **kwargs)
         self.assertRaises(expected_error, ssh_key.parse)
+
+
+class TestOptions(unittest.TestCase):
+    def check_valid_option(self, option, parsed_option):
+        ssh = SSHKey()
+        parsed = ssh.parse_options(option)
+        self.assertEqual(parsed, parsed_option)
+
+    def check_invalid_option(self, option, expected_error):
+        ssh = SSHKey()
+        self.assertRaises(expected_error, ssh.parse_options, option)
+
+
+def loop_options(options):
+    """ Loop over list of options and dynamically create tests """
+    def ch(option, parsed_option):
+        return lambda self: self.check_valid_option(option, parsed_option)
+    for i, items in enumerate(options):
+        prefix_tmp = "%s_%s" % (items[0], i)
+        setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
+
+
+def loop_invalid_options(options):
+    def ch(option, expected_error):
+        return lambda self: self.check_invalid_option(option, expected_error)
+    for i, items in enumerate(options):
+        prefix_tmp = "%s_%s" % (items[0], i)
+        setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
 
 
 def loop_valid(keyset, prefix):
@@ -68,6 +98,8 @@ def loop_invalid(keyset, prefix):
 loop_valid(list_of_valid_keys, "valid_key")
 loop_valid(list_of_valid_keys_rfc4716, "valid_key_rfc4716")
 loop_invalid(list_of_invalid_keys, "invalid_key")
+loop_options(list_of_valid_options)
+loop_invalid_options(list_of_invalid_options)
 
 if __name__ == '__main__':
     unittest.main()

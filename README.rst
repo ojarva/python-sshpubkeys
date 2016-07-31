@@ -48,12 +48,16 @@ Usage:
   print(ssh.hash_sha256())  # SHA256:xk3IEJIdIoR9MmSRXTP98rjDdZocmXJje/28ohMQEwM
   print(ssh.hash_sha512())  # SHA512:1C3lNBhjpDVQe39hnyy+xvlZYU3IPwzqK1rVneGavy6O3/ebjEQSFvmeWoyMTplIanmUK1hmr9nA8Skmj516HA
   print(ssh.comment)  # ojar@ojar-laptop
-  print(ssh.options)  # None (optional options at the beginning of public key. You may want to check for these if you're validating user-submitted keys.)
+  print(ssh.options_raw)  # None (string of optional options at the beginning of public key)
+  print(ssh.options)  # None (options as a dictionary, parsed and validated)
 
 Options
 -------
 
-- strict_mode: if set to True, disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
+Set options in constructor as a keywords (i.e., `SSHKey(None, strict_mode=False)`)
+
+- strict_mode: defaults to True. Disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
+- skip_option_parsing: if set to True, options string is not parsed (ssh.options_raw is populated, but ssh.options is not).
 
 Exceptions
 ----------

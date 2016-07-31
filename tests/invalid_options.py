@@ -2,7 +2,8 @@ from sshpubkeys.exceptions import InvalidOptionsException, UnknownOptionNameExce
 options = [
     ["includes_space", "no-user-rc ", InvalidOptionsException],
     ["includes_space_multiple", "no-user-rc, port-forwarding", InvalidOptionsException],
-    ["includes_space_before_comma", "no-user-rc ,port-forwarding", InvalidOptionsException],
+    ["includes_space_before_comma",
+        "no-user-rc ,port-forwarding", InvalidOptionsException],
     ["empty_option_end", "no-user-rc,", InvalidOptionsException],
     ["empty_option_beginning", ",no-user-rc", InvalidOptionsException],
     ["empty_option_middle", "no-user-rc,,port-forwarding", InvalidOptionsException],
@@ -12,5 +13,6 @@ options = [
     ["invalid_characters_in_key_space", 'fr om', InvalidOptionNameException],
     ["unknown_option_name", "random-option-name", UnknownOptionNameException],
     ["unbalanced_quotes_complex", 'from="asdf",no-user-rc"', InvalidOptionsException],
-    ["parameter_missing", 'from,no-user-rc"', MissingMandatoryOptionValueException],
+    ["parameter_missing", 'from,no-user-rc"',
+        MissingMandatoryOptionValueException],
 ]

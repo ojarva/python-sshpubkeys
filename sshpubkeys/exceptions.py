@@ -1,48 +1,55 @@
+# pylint:disable=line-too-long
+
+""" Exceptions for sshpubkeys """
+
+
 class InvalidKeyException(Exception):
-    """ Key is invalid. """
+    """ Invalid key - something is wrong with the key, and it should not be accepted, as OpenSSH will not work with it. """
     pass
 
 
 class InvalidKeyLengthException(InvalidKeyException):
-    """ Invalid key length """
+    """ Invalid key length - either too short or too long.
+
+    See also TooShortKeyException and TooLongKeyException """
     pass
 
 
 class TooShortKeyException(InvalidKeyLengthException):
-    """ Key is shorter than what specification allows """
+    """ Key is shorter than what the specification allows """
     pass
 
 
 class TooLongKeyException(InvalidKeyLengthException):
-    """ Key is longer than what specification allows """
+    """ Key is longer than what the specification allows """
     pass
 
 
 class InvalidTypeException(InvalidKeyException):
-    """ Key type is invalid """
+    """ Key type is invalid or unrecognized """
     pass
 
 
 class MalformedDataException(InvalidKeyException):
-    """ Key is invalid - unable to read the data """
+    """ The key is invalid - unable to parse the data. The data may be corrupted, truncated, or includes extra content that is not allowed. """
     pass
 
 
 class InvalidOptionsException(MalformedDataException):
-    """ Options string is invalid """
+    """ Options string is invalid: it contains invalid characters, unrecognized options, or is otherwise malformed. """
     pass
 
 
 class InvalidOptionNameException(InvalidOptionsException):
-    """ Invalid option name (contains disallowed characters) """
+    """ Invalid option name (contains disallowed characters, or is unrecognized.) """
     pass
 
 
 class UnknownOptionNameException(InvalidOptionsException):
-    """ Option name is unknown. """
+    """ Unrecognized option name. """
     pass
 
 
 class MissingMandatoryOptionValueException(InvalidOptionsException):
-    """ Option must have value, but value is missing. """
+    """ Mandatory option value is missing. """
     pass

@@ -13,7 +13,16 @@ from .valid_options import options as list_of_valid_options
 from .invalid_options import options as list_of_invalid_options
 
 
+class TestMisc(unittest.TestCase):
+
+    def test_none_to_constructor(self):
+        ssh = SSHKey(None)
+        self.assertIsNone(ssh.keydata)
+        self.assertRaises(ValueError, ssh.parse)
+
+
 class TestKeys(unittest.TestCase):
+
     def check_key(self, pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):
         """ Checks valid key """
         ssh = SSHKey(pubkey, **kwargs)
@@ -33,6 +42,7 @@ class TestKeys(unittest.TestCase):
 
 
 class TestOptions(unittest.TestCase):
+
     def check_valid_option(self, option, parsed_option):
         ssh = SSHKey()
         parsed = ssh.parse_options(option)

@@ -10,7 +10,7 @@ key_data = open("ssh-pubkey-file.pem").read()
 ssh_key = SSHKey(key_data)
 try:
     ssh_key.parse()
-except InvalidKeyException:
+except InvalidKeyError:
     print("Invalid key")
     sys.exit(1)
 print(ssh_key.bits)
@@ -107,7 +107,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         if keydata:
             try:
                 self.parse(keydata)
-            except (InvalidKeyException, NotImplementedError):
+            except (InvalidKeyError, NotImplementedError):
                 pass
 
     def reset(self):
@@ -149,14 +149,14 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         try:
             requested_data_length = struct.unpack('>I', data[current_position:current_position + self.INT_LEN])[0]
         except struct.error:
-            raise MalformedDataException("Unable to unpack %s bytes from the data" % self.INT_LEN)
+            raise MalformedDataError("Unable to unpack %s bytes from the data" % self.INT_LEN)
 
         # Move pointer to the beginning of the data field
         current_position += self.INT_LEN
         remaining_data_length = len(data[current_position:])
 
         if remaining_data_length < requested_data_length:
-            raise MalformedDataException("Requested %s bytes, but only %s bytes available." % (requested_data_length, remaining_data_length))
+            raise MalformedDataError("Requested %s bytes, but only %s bytes available." % (requested_data_length, remaining_data_length))
 
         next_data = data[current_position:current_position + requested_data_length]
         # Move pointer to the end of the data field
@@ -192,10 +192,10 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                     data = data[i + 1:]
                     break
             else:
-                raise MalformedDataException("Couldn't find beginning of the key data")
+                raise MalformedDataError("Couldn't find beginning of the key data")
         key_parts = data.strip().split(None, 2)
         if len(key_parts) < 2:  # Key type and content are mandatory fields.
-            raise InvalidKeyException("Unexpected key format: at least type and base64 encoded value is required")
+            raise InvalidKeyError("Unexpected key format: at least type and base64 encoded value is required")
         if len(key_parts) == 3:
             self.comment = key_parts[2]
             key_parts = key_parts[0:2]
@@ -216,7 +216,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         try:
             decoded_key = base64.b64decode(pubkey_content.encode("ascii"))
         except (TypeError, binascii.Error):
-            raise MalformedDataException("Unable to decode the key")
+            raise MalformedDataError("Unable to decode the key")
         return decoded_key
 
     @classmethod
@@ -237,15 +237,15 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                 opt_name = opt
                 opt_value = True
             if " " in opt_name or not self.OPTION_NAME_RE.match(opt_name):
-                raise InvalidOptionNameException("%s is not valid option name." % opt_name)
+                raise InvalidOptionNameError("%s is not valid option name." % opt_name)
             if self.strict_mode:
                 for valid_opt_name, value_required in self.OPTIONS_SPEC:
                     if opt_name.lower() == valid_opt_name:
                         if value_required and opt_value is True:
-                            raise MissingMandatoryOptionValueException("%s is missing mandatory value." % opt_name)
+                            raise MissingMandatoryOptionValueError("%s is missing mandatory value." % opt_name)
                         break
                 else:
-                    raise UnknownOptionNameException("%s is unrecognized option name." % opt_name)
+                    raise UnknownOptionNameError("%s is unrecognized option name." % opt_name)
             if opt_name not in parsed_options:
                 parsed_options[opt_name] = []
             parsed_options[opt_name].append(opt_value)
@@ -266,7 +266,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             opt = options[start_of_current_opt:]
             parse_add_single_option(opt)
         if quote_open:
-            raise InvalidOptionsException("Unbalanced quotes.")
+            raise InvalidOptionsError("Unbalanced quotes.")
         return parsed_options
 
     def _process_ssh_rsa(self, data):
@@ -287,9 +287,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             min_length = self.RSA_MIN_LENGTH_LOOSE
             max_length = self.RSA_MAX_LENGTH_LOOSE
         if self.bits < min_length:
-            raise TooShortKeyException("%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+            raise TooShortKeyError("%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
         if self.bits > max_length:
-            raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
+            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
         return current_position
 
     def _process_ssh_dss(self, data):
@@ -305,7 +305,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
         q_bits = self._bits_in_number(data_fields["q"])
         if q_bits != self.DSA_N_LENGTH:
-            raise InvalidKeyException("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
+            raise InvalidKeyError("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
         if self.strict_mode:
             min_length = self.DSA_MIN_LENGTH_STRICT
             max_length = self.DSA_MAX_LENGTH_STRICT
@@ -313,9 +313,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             min_length = self.DSA_MIN_LENGTH_LOOSE
             max_length = self.DSA_MAX_LENGTH_LOOSE
         if self.bits < min_length:
-            raise TooShortKeyException("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
         if self.bits > max_length:
-            raise TooLongKeyException("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
+            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
         return current_position
 
     def _process_ecdsa_sha(self, data):
@@ -330,7 +330,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             # data starts with \x04, which should be discarded.
             ecdsa_key = ecdsa.VerifyingKey.from_string(key_data[1:], curve, hash_algorithm)
         except AssertionError:
-            raise InvalidKeyException("Invalid ecdsa key")
+            raise InvalidKeyError("Invalid ecdsa key")
         self.bits = int(curve_information.replace(b"nistp", b""))
         self.ecdsa = ecdsa_key
         return current_position
@@ -348,11 +348,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         verifying_key = self._parse_long(verifying_key)
 
         if verifying_key < 0:
-            raise InvalidKeyException("ed25519 verifying key must be >0.")
+            raise InvalidKeyError("ed25519 verifying key must be >0.")
 
         self.bits = verifying_key_length
         if self.bits != 256:
-            raise InvalidKeyLengthException("ed25519 keys must be 256 bits (was %s bits)" % self.bits)
+            raise InvalidKeyLengthError("ed25519 keys must be 256 bits (was %s bits)" % self.bits)
         return current_position
 
     def _process_key(self, data):
@@ -405,7 +405,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         # Check key type
         current_position, unpacked_key_type = self._unpack_by_int(self._decoded_key, 0)
         if key_type is not None and key_type != unpacked_key_type.decode():
-            raise InvalidTypeException("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
+            raise InvalidTypeError("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
 
         self.key_type = unpacked_key_type
 
@@ -413,4 +413,4 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         current_position = current_position + key_data_length
 
         if current_position != len(self._decoded_key):
-            raise MalformedDataException("Leftover data: %s bytes" % (len(self._decoded_key) - current_position))
+            raise MalformedDataError("Leftover data: %s bytes" % (len(self._decoded_key) - current_position))

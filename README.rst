@@ -36,7 +36,7 @@ Usage:
         "H1pON6P0= ojarva@ojar-laptop", strict_mode=True)
   try:
       ssh.parse()
-  except InvalidKeyException as err:
+  except InvalidKeyError as err:
       print("Invalid key:", err)
       sys.exit(1)
   except NotImplementedError as err:
@@ -63,15 +63,15 @@ Exceptions
 ----------
 
 - NotImplementedError if invalid ecdsa curve or unknown key type is encountered.
-- InvalidKeyException if any other error is encountered:
-    - TooShortKeyException if key is too short (<768 bits for RSA, <1024 for DSA, <256 for ED25519)
-    - TooLongKeyException if key is too long (>16384 for RSA, >1024 for DSA, >256 for ED25519)
-    - InvalidTypeException if key type ("ssh-rsa" in above example) does not match to what is included in base64 encoded data.
-    - MalformedDataException if decoding and extracting the data fails.
-    - InvalidOptionsException if options string is invalid.
-        - InvalidOptionNameException if option name contains invalid characters.
-            - UnknownOptionNameException if option name is not recognized.
-        - MissingMandatoryOptionValueException if option needs to have parameter, but it is absent.
+- InvalidKeyError if any other error is encountered:
+    - TooShortKeyError if key is too short (<768 bits for RSA, <1024 for DSA, <256 for ED25519)
+    - TooLongKeyError if key is too long (>16384 for RSA, >1024 for DSA, >256 for ED25519)
+    - InvalidTypeError if key type ("ssh-rsa" in above example) does not match to what is included in base64 encoded data.
+    - MalformedDataError if decoding and extracting the data fails.
+    - InvalidOptionsError if options string is invalid.
+        - InvalidOptionNameError if option name contains invalid characters.
+            - UnknownOptionNameError if option name is not recognized.
+        - MissingMandatoryOptionValueError if option needs to have parameter, but it is absent.
 
 Tests
 -----

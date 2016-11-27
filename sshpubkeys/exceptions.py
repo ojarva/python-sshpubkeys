@@ -8,48 +8,100 @@ class InvalidKeyException(Exception):
     pass
 
 
-class InvalidKeyLengthException(InvalidKeyException):
+class InvalidKeyError(InvalidKeyException):
+    """ Invalid key - something is wrong with the key, and it should not be accepted, as OpenSSH will not work with it. """
+    pass
+
+
+class InvalidKeyLengthException(InvalidKeyError):
     """ Invalid key length - either too short or too long.
 
     See also TooShortKeyException and TooLongKeyException """
     pass
 
 
-class TooShortKeyException(InvalidKeyLengthException):
+class InvalidKeyLengthError(InvalidKeyError):
+    """ Invalid key length - either too short or too long.
+
+    See also TooShortKeyException and TooLongKeyException """
+    pass
+
+
+class TooShortKeyException(InvalidKeyLengthError):
     """ Key is shorter than what the specification allows """
     pass
 
 
-class TooLongKeyException(InvalidKeyLengthException):
+class TooShortKeyError(TooShortKeyException):
+    """ Key is shorter than what the specification allows """
+    pass
+
+
+class TooLongKeyException(InvalidKeyLengthError):
     """ Key is longer than what the specification allows """
     pass
 
 
-class InvalidTypeException(InvalidKeyException):
+class TooLongKeyError(TooLongKeyException):
+    """ Key is longer than what the specification allows """
+    pass
+
+
+class InvalidTypeException(InvalidKeyError):
     """ Key type is invalid or unrecognized """
     pass
 
 
-class MalformedDataException(InvalidKeyException):
+class InvalidTypeError(InvalidTypeException):
+    """ Key type is invalid or unrecognized """
+    pass
+
+
+class MalformedDataException(InvalidKeyError):
     """ The key is invalid - unable to parse the data. The data may be corrupted, truncated, or includes extra content that is not allowed. """
     pass
 
 
-class InvalidOptionsException(MalformedDataException):
+class MalformedDataError(MalformedDataException):
+    """ The key is invalid - unable to parse the data. The data may be corrupted, truncated, or includes extra content that is not allowed. """
+    pass
+
+
+class InvalidOptionsException(MalformedDataError):
     """ Options string is invalid: it contains invalid characters, unrecognized options, or is otherwise malformed. """
     pass
 
 
-class InvalidOptionNameException(InvalidOptionsException):
+class InvalidOptionsError(InvalidOptionsException):
+    """ Options string is invalid: it contains invalid characters, unrecognized options, or is otherwise malformed. """
+    pass
+
+
+class InvalidOptionNameException(InvalidOptionsError):
     """ Invalid option name (contains disallowed characters, or is unrecognized.) """
     pass
 
 
-class UnknownOptionNameException(InvalidOptionsException):
+class InvalidOptionNameError(InvalidOptionNameException):
+    """ Invalid option name (contains disallowed characters, or is unrecognized.) """
+    pass
+
+
+class UnknownOptionNameException(InvalidOptionsError):
     """ Unrecognized option name. """
     pass
 
 
-class MissingMandatoryOptionValueException(InvalidOptionsException):
+class UnknownOptionNameError(UnknownOptionNameException):
+    """ Unrecognized option name. """
+    pass
+
+
+class MissingMandatoryOptionValueException(InvalidOptionsError):
+    """ Mandatory option value is missing. """
+    pass
+
+
+class MissingMandatoryOptionValueError(MissingMandatoryOptionValueException):
     """ Mandatory option value is missing. """
     pass

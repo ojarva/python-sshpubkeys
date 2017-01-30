@@ -104,6 +104,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         self.key_type = None
         self.strict_mode = bool(kwargs.get("strict", True))
         self.skip_option_parsing = bool(kwargs.get("skip_option_parsing", False))
+        self.disallow_options = bool(kwargs.get("disallow_options", False))
         if keydata:
             try:
                 self.parse(keydata)
@@ -414,3 +415,6 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
         if current_position != len(self._decoded_key):
             raise MalformedDataError("Leftover data: %s bytes" % (len(self._decoded_key) - current_position))
+
+        if self.disallow_options and self.options:
+            raise InvalidOptionsError("Options are disabled.")

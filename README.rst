@@ -55,6 +55,8 @@ Set options in constructor as a keywords (i.e., `SSHKey(None, strict_mode=False)
 
 - strict_mode: defaults to True. Disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
 - skip_option_parsing: if set to True, options string is not parsed (ssh.options_raw is populated, but ssh.options is not).
+- disallow_options: if set to True, options are not allowed and it will raise an
+  InvalidOptionsError.
 
 Exceptions
 ----------

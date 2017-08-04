@@ -417,4 +417,4 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             raise MalformedDataError("Leftover data: %s bytes" % (len(self._decoded_key) - current_position))
 
         if self.disallow_options and self.options:
-            raise InvalidOptionsError("Options are disabled.")
+            raise InvalidOptionsError("Options are disallowed.")

@@ -389,13 +389,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         if keydata.startswith("---- BEGIN SSH2 PUBLIC KEY ----"):
             # SSH2 key format
             key_type = None  # There is no redundant key-type field - skip comparing plain-text and encoded data.
-            pubkey_content = ""
-            for line in keydata.split("\n"):
-                if ":" in line:  # key-value lines
-                    continue
-                if "----" in line:  # begin/end lines
-                    continue
-                pubkey_content += line
+            pubkey_content = "".join([line for line in keydata.split("\n") if ":" not in line and "----" not in line])
         else:
             key_parts = self._split_key(keydata)
             key_type = key_parts[0]

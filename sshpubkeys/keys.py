@@ -1,7 +1,6 @@
 # pylint:disable=line-too-long
 
-"""
-Parser for ssh public keys. Currently supports ssh-rsa, ssh-dsa, ssh-ed25519 and ssh-dss keys.
+"""Parser for ssh public keys. Currently supports ssh-rsa, ssh-dsa, ssh-ed25519 and ssh-dss keys.
 
 import sys
 
@@ -13,9 +12,7 @@ try:
 except InvalidKeyError:
     print("Invalid key")
     sys.exit(1)
-print(ssh_key.bits)
-
-"""
+print(ssh_key.bits)"""
 
 import base64
 import binascii
@@ -28,20 +25,20 @@ import ecdsa
 
 from Crypto.PublicKey import RSA, DSA
 
-from .exceptions import *  # pylint:disable=wildcard-import
+from .exceptions import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
 __all__ = ["SSHKey"]
 
 
 class SSHKey(object):  # pylint:disable=too-many-instance-attributes
-    """
+    """Presents a single SSH keypair.
+
     ssh_key = SSHKey(key_data, strict=True)
     ssh_key.parse()
 
     strict=True (default) only allows keys ssh-keygen generates. Setting strict mode to false allows
     all keys OpenSSH actually accepts, including highly insecure ones. For example, OpenSSH accepts
-    512-bit DSA keys and 64-bit RSA keys which are highly insecure.
-    """
+    512-bit DSA keys and 64-bit RSA keys which are highly insecure."""
 
     DSA_MIN_LENGTH_STRICT = 1024
     DSA_MAX_LENGTH_STRICT = 1024
@@ -112,40 +109,38 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                 pass
 
     def reset(self):
-        """ Reset all data fields """
+        """Reset all data fields."""
         for field in self.FIELDS:
             setattr(self, field, None)
 
     def hash(self):
-        """ Calculate md5 fingerprint.
+        """Calculate md5 fingerprint.
 
-        Deprecated, use .hash_md5() instead.
-        """
+        Deprecated, use .hash_md5() instead."""
         warnings.warn("hash() is deprecated. Use hash_md5(), hash_sha256() or hash_sha512() instead.")
         return self.hash_md5().replace(b"MD5:", b"")
 
     def hash_md5(self):
-        """ Calculate md5 fingerprint.
+        """Calculate md5 fingerprint.
 
         Shamelessly copied from http://stackoverflow.com/questions/6682815/deriving-an-ssh-fingerprint-from-a-public-key-in-python
 
-        For specification, see RFC4716, section 4.
-        """
+        For specification, see RFC4716, section 4."""
         fp_plain = hashlib.md5(self._decoded_key).hexdigest()
         return "MD5:" + ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
 
     def hash_sha256(self):
-        """ Calculate sha256 fingerprint. """
+        """Calculate sha256 fingerprint."""
         fp_plain = hashlib.sha256(self._decoded_key).digest()
         return (b"SHA256:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
 
     def hash_sha512(self):
-        """ Calculates sha512 fingerprint. """
+        """Calculates sha512 fingerprint."""
         fp_plain = hashlib.sha512(self._decoded_key).digest()
         return (b"SHA512:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
 
     def _unpack_by_int(self, data, current_position):
-        """ Returns a tuple with (location of next data field, contents of requested data field). """
+        """Returns a tuple with (location of next data field, contents of requested data field)."""
         # Unpack length of data field
         try:
             requested_data_length = struct.unpack('>I', data[current_position:current_position + self.INT_LEN])[0]
@@ -166,13 +161,14 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
     @classmethod
     def _parse_long(cls, data):
-        """ Calculate two's complement """
+        """Calculate two's complement."""
         if sys.version < '3':
-            ret = long(0)
+            # this does not exist in python 3 - undefined-variable disabled to make pylint happier.
+            ret = long(0)  # pylint:disable=undefined-variable
             for byte in data:
                 ret = (ret << 8) + ord(byte)
         else:
-            ret = 0  # pylint:disable=redefined-variable-type
+            ret = 0
             for byte in data:
                 ret = (ret << 8) + byte
         return ret
@@ -213,7 +209,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
     @classmethod
     def decode_key(cls, pubkey_content):
-        """ Decode base64 coded part of the key. """
+        """Decode base64 coded part of the key."""
         try:
             decoded_key = base64.b64decode(pubkey_content.encode("ascii"))
         except (TypeError, binascii.Error):
@@ -225,12 +221,12 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return len(format(number, "b"))
 
     def parse_options(self, options):
-        """ Parses ssh options string """
+        """Parses ssh options string."""
         quote_open = False
         parsed_options = {}
 
         def parse_add_single_option(opt):
-            """ Parses and validates a single option, and adds it to parsed_options field. """
+            """Parses and validates a single option, and adds it to parsed_options field."""
             if "=" in opt:
                 opt_name, opt_value = opt.split("=", 1)
                 opt_value = opt_value.replace('"', '')
@@ -271,7 +267,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return parsed_options
 
     def _process_ssh_rsa(self, data):
-        """ Parses ssh-rsa public keys """
+        """Parses ssh-rsa public keys."""
         current_position, raw_e = self._unpack_by_int(data, 0)
         current_position, raw_n = self._unpack_by_int(data, current_position)
 
@@ -294,7 +290,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return current_position
 
     def _process_ssh_dss(self, data):
-        """ Parses ssh-dsa public keys """
+        """Parses ssh-dsa public keys."""
         data_fields = {}
         current_position = 0
         for item in ("p", "q", "g", "y"):
@@ -320,7 +316,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return current_position
 
     def _process_ecdsa_sha(self, data):
-        """ Parses ecdsa-sha public keys """
+        """Parses ecdsa-sha public keys."""
         current_position, curve_information = self._unpack_by_int(data, 0)
         if curve_information not in self.ECDSA_CURVE_DATA:
             raise NotImplementedError("Invalid curve type: %s" % curve_information)
@@ -337,12 +333,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         return current_position
 
     def _process_ed25516(self, data):
-        """ Parses ed25516 keys.
+        """Parses ed25516 keys.
 
         There is no (apparent) way to validate ed25519 keys. This only
         checks data length (256 bits), but does not try to validate
-        the key in any way.
-        """
+        the key in any way."""
 
         current_position, verifying_key = self._unpack_by_int(data, 0)
         verifying_key_length = len(verifying_key) * 8
@@ -369,7 +364,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             raise NotImplementedError("Invalid key type: %s" % self.key_type)
 
     def parse(self, keydata=None):
-        """ Validates SSH public key
+        """Validates SSH public key.
 
         Throws exception for invalid keys. Otherwise returns None.
 
@@ -377,7 +372,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
 
         For rsa keys, see field "rsa" for raw public key data.
         For dsa keys, see field "dsa".
-        For ecdsa keys, see field "ecdsa". """
+        For ecdsa keys, see field "ecdsa"."""
         if keydata is None:
             if self.keydata is None:
                 raise ValueError("Key data must be supplied either in constructor or to parse()")

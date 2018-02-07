@@ -275,7 +275,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         unpacked_n = self._parse_long(raw_n)
 
         self.rsa = RSA.construct((unpacked_n, unpacked_e))
-        self.bits = self.rsa.size() + 1
+
+        try:
+            self.bits = self.rsa.size() + 1
+        except TypeError:
+            self.bits = self.rsa.size_in_bits()
 
         if self.strict_mode:
             min_length = self.RSA_MIN_LENGTH_STRICT

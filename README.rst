@@ -30,7 +30,7 @@ Usage:
   ssh = SSHKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAYQCxO38tKAJXIs9ivPxt7AY"
         "dfybgtAR1ow3Qkb9GPQ6wkFHQqcFDe6faKCxH6iDRteo4D8L8B"
         "xwzN42uZSB0nfmjkIxFTcEU3mFSXEbWByg78aoddMrAAjatyrh"
-        "H1pON6P0= ojarva@ojar-laptop", strict_mode=True)
+        "H1pON6P0= ojarva@ojar-laptop", strict=True)
   try:
       ssh.parse()
   except InvalidKeyError as err:
@@ -51,9 +51,9 @@ Usage:
 Options
 -------
 
-Set options in constructor as a keywords (i.e., `SSHKey(None, strict_mode=False)`)
+Set options in constructor as a keywords (i.e., `SSHKey(None, strict=False)`)
 
-- strict_mode: defaults to True. Disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
+- strict: defaults to True. Disallows keys OpenSSH's ssh-keygen refuses to create. For instance, this includes DSA keys where length != 1024 bits and RSA keys shorter than 1024-bit. If set to False, tries to allow all keys OpenSSH accepts, including highly insecure 1-bit DSA keys.
 - skip_option_parsing: if set to True, options string is not parsed (ssh.options_raw is populated, but ssh.options is not).
 - disallow_options: if set to True, options are not allowed and it will raise an
   InvalidOptionsError.

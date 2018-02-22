@@ -22,8 +22,9 @@ import struct
 import sys
 import warnings
 import ecdsa
-
-from Crypto.PublicKey import RSA, DSA
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.dsa import DSAPublicNumbers, DSAParameterNumbers
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 
 from .exceptions import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
@@ -43,7 +44,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     DSA_MIN_LENGTH_STRICT = 1024
     DSA_MAX_LENGTH_STRICT = 1024
     DSA_MIN_LENGTH_LOOSE = 1
-    DSA_MAX_LENGTH_LOOSE = 16384
+    DSA_MAX_LENGTH_LOOSE = 3072
 
     DSA_N_LENGTH = 160
 
@@ -274,8 +275,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         unpacked_e = self._parse_long(raw_e)
         unpacked_n = self._parse_long(raw_n)
 
-        self.rsa = RSA.construct((unpacked_n, unpacked_e))
-        self.bits = self.rsa.size() + 1
+        self.rsa = RSAPublicNumbers(unpacked_e, unpacked_n).public_key(default_backend())
+        self.bits = self.rsa.key_size
 
         if self.strict_mode:
             min_length = self.RSA_MIN_LENGTH_STRICT
@@ -297,10 +298,8 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             current_position, value = self._unpack_by_int(data, current_position)
             data_fields[item] = self._parse_long(value)
 
-        self.dsa = DSA.construct((data_fields["y"], data_fields["g"], data_fields["p"], data_fields["q"]))
-        self.bits = self.dsa.size() + 1
-
         q_bits = self._bits_in_number(data_fields["q"])
+        p_bits = self._bits_in_number(data_fields["p"])
         if q_bits != self.DSA_N_LENGTH:
             raise InvalidKeyError("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
         if self.strict_mode:
@@ -309,10 +308,15 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         else:
             min_length = self.DSA_MIN_LENGTH_LOOSE
             max_length = self.DSA_MAX_LENGTH_LOOSE
-        if self.bits < min_length:
-            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
-        if self.bits > max_length:
-            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
+        if p_bits < min_length:
+            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, p_bits))
+        if p_bits > max_length:
+            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, p_bits))
+
+        dsa_parameters = DSAParameterNumbers(data_fields["p"], data_fields["q"], data_fields["g"])
+        self.dsa = DSAPublicNumbers(data_fields["y"], dsa_parameters).public_key(default_backend())
+        self.bits = self.dsa.key_size
+
         return current_position
 
     def _process_ecdsa_sha(self, data):

@@ -1,4 +1,6 @@
-from sshpubkeys.exceptions import InvalidOptionsError, UnknownOptionNameError, InvalidOptionNameError, MissingMandatoryOptionValueError
+from sshpubkeys.exceptions import (InvalidOptionNameError, InvalidOptionsError, MissingMandatoryOptionValueError,
+                                   UnknownOptionNameError)
+
 options = [
     ["includes_space", "no-user-rc ", InvalidOptionsError],
     ["includes_space_multiple", "no-user-rc, port-forwarding", InvalidOptionsError],

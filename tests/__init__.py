@@ -5,7 +5,7 @@ New test is generated for each key so that running unittests gives out meaningfu
 """
 
 import unittest
-from sshpubkeys import *
+from sshpubkeys import SSHKey
 from .valid_keys import keys as list_of_valid_keys
 from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
 from .invalid_keys import keys as list_of_invalid_keys
@@ -23,7 +23,7 @@ class TestMisc(unittest.TestCase):
 
 class TestKeys(unittest.TestCase):
 
-    def check_key(self, pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):
+    def check_key(self, pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):  # pylint:disable=too-many-arguments
         """ Checks valid key """
         ssh = SSHKey(pubkey, **kwargs)
         ssh.parse()
@@ -72,9 +72,9 @@ def loop_invalid_options(options):
 
 def loop_valid(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """
-    def ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):
+    def ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):  # pylint:disable=too-many-arguments
         return lambda self: self.check_key(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs)
-    for i, items in enumerate(keyset):
+    for items in keyset:
         modes = items.pop()
         prefix_tmp = "%s_%s" % (prefix, items.pop())
         for mode in modes:
@@ -94,7 +94,7 @@ def loop_invalid(keyset, prefix):
     """ Loop over list of invalid keys and dynamically create tests """
     def ch(pubkey, expected_error, **kwargs):
         return lambda self: self.check_fail(pubkey, expected_error, **kwargs)
-    for i, items in enumerate(keyset):
+    for items in keyset:
         modes = items.pop()
         prefix_tmp = "%s_%s" % (prefix, items.pop())
         for mode in modes:

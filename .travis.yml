@@ -11,7 +11,7 @@ python:
   - "nightly"
 install:
   - pip install -r requirements.txt
-  - pip install pycodestyle isort
+  - pip install pycodestyle isort pylint
 script:
   - isort --diff --check --recursive sshpubkeys tests
   - pycodestyle --ignore E501,E402 --exclude=.git,dev3 sshpubkeys tests

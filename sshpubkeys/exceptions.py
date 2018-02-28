@@ -1,4 +1,4 @@
-# pylint:disable=line-too-long
+# pylint:disable=line-too-long,too-many-ancestors
 
 """Exceptions for sshpubkeys."""
 

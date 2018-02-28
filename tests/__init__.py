@@ -105,6 +105,7 @@ def loop_invalid(keyset, prefix):
             pubkey, expected_error = items
             setattr(TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode), ch(pubkey, expected_error, **kwargs))
 
+
 loop_valid(list_of_valid_keys, "valid_key")
 loop_valid(list_of_valid_keys_rfc4716, "valid_key_rfc4716")
 loop_invalid(list_of_invalid_keys, "invalid_key")

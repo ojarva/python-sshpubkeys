@@ -4,6 +4,17 @@ OpenSSH Public Key Parser for Python
 .. image:: https://travis-ci.org/ojarva/python-sshpubkeys.svg?branch=master
     :target: https://travis-ci.org/ojarva/python-sshpubkeys
 
+Major changes between versions 2 and 3
+--------------------------------------
+
+- Dropped support for Python 2.6 and 3.3
+- Even in loose mode, DSA keys must be 1024, 2048, or 3072 bits (earlier this was looser)
+- The interface (API) is exactly the same
+
+
+Usage
+-----
+
 Native implementation for validating OpenSSH public keys.
 
 Currently ssh-rsa, ssh-dss (DSA), ssh-ed25519 and ecdsa keys with NIST curves are supported.

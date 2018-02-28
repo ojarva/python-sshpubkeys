@@ -4,3 +4,5 @@ syntax: glob
 __pycache__/
 *.egg-info/
 dev/
+build/
+dist/

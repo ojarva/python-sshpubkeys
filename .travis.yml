@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
   - "3.4"
   - "3.5"
@@ -9,5 +8,11 @@ python:
   - "3.6-dev"
   - "3.7-dev"
   - "nightly"
-install: "pip install -r requirements.txt"
-script: "python setup.py test"
+install:
+  - pip install -r requirements.txt
+  - pip install pycodestyle isort pylint
+script:
+  - isort --diff --check --recursive sshpubkeys tests
+  - pycodestyle --ignore E501,E402 --exclude=.git,dev3 sshpubkeys tests
+  - pylint sshpubkeys tests --disable line-too-long --disable missing-docstring --disable no-self-use --disable fixme --disable bad-indentation --disable bad-continuation --disable invalid-name --disable too-many-locals --disable duplicate-code --disable too-many-branches
+  - python setup.py test

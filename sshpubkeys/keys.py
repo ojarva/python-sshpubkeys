@@ -21,9 +21,10 @@ import re
 import struct
 import sys
 import warnings
+
 import ecdsa
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.dsa import DSAPublicNumbers, DSAParameterNumbers
+from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 
 from .exceptions import *  # pylint:disable=wildcard-import,unused-wildcard-import

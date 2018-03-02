@@ -57,7 +57,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         b"nistp521": (ecdsa.curves.NIST521p, hashlib.sha512),
     }
 
-    RSA_MIN_LENGTH_STRICT = 1024
+    RSA_MIN_LENGTH_STRICT = 1023
     RSA_MAX_LENGTH_STRICT = 16384
     RSA_MIN_LENGTH_LOOSE = 768
     RSA_MAX_LENGTH_LOOSE = 16384

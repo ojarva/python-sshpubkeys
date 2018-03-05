@@ -4,13 +4,26 @@ New test is generated for each key so that running unittests gives out meaningfu
 
 """
 
+import sys
 import unittest
-from sshpubkeys import SSHKey
+
+from sshpubkeys import AuthorizedKeysFile, InvalidOptionsError, SSHKey
+
+from .authorized_keys import items as list_of_authorized_keys
+from .invalid_authorized_keys import items as list_of_invalid_authorized_keys
+from .invalid_keys import keys as list_of_invalid_keys
+from .invalid_options import options as list_of_invalid_options
 from .valid_keys import keys as list_of_valid_keys
 from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
-from .invalid_keys import keys as list_of_invalid_keys
 from .valid_options import options as list_of_valid_options
-from .invalid_options import options as list_of_invalid_options
+
+if sys.version_info.major == 2:
+    from io import BytesIO as StringIO
+else:
+    from io import StringIO
+
+
+DEFAULT_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD"
 
 
 class TestMisc(unittest.TestCase):
@@ -51,6 +64,32 @@ class TestOptions(unittest.TestCase):
     def check_invalid_option(self, option, expected_error):
         ssh = SSHKey()
         self.assertRaises(expected_error, ssh.parse_options, option)
+
+    def test_disallow_options(self):
+        ssh = SSHKey(disallow_options=True)
+        key = """command="dump /home",no-pty,no-port-forwarding """ + DEFAULT_KEY
+        self.assertRaises(InvalidOptionsError, ssh.parse, key)
+
+
+class TestAuthorizedKeys(unittest.TestCase):
+
+    def check_valid_file(self, file_str, valid_keys_count):
+        file_obj = StringIO(file_str)
+        key_file = AuthorizedKeysFile(file_obj)
+        for item in key_file.keys:
+            self.assertIsInstance(item, SSHKey)
+        self.assertEqual(len(key_file.keys), valid_keys_count)
+
+    def check_invalid_file(self, file_str, expected_error):
+        file_obj = StringIO(file_str)
+        self.assertRaises(expected_error, AuthorizedKeysFile, file_obj)
+
+    def test_disallow_options(self):
+        file_obj = StringIO("""command="dump /home",no-pty,no-port-forwarding """ + DEFAULT_KEY)
+        self.assertRaises(InvalidOptionsError, AuthorizedKeysFile, file_obj, disallow_options=True)
+        file_obj.seek(0)
+        key_file = AuthorizedKeysFile(file_obj)
+        self.assertEqual(len(key_file.keys), 1)
 
 
 def loop_options(options):
@@ -106,11 +145,29 @@ def loop_invalid(keyset, prefix):
             setattr(TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode), ch(pubkey, expected_error, **kwargs))
 
 
+def loop_authorized_keys(keyset):
+    def ch(file_str, valid_keys_count):
+        return lambda self: self.check_valid_file(file_str, valid_keys_count)
+    for i, items in enumerate(keyset):
+        prefix_tmp = "%s_%s" % (items[0], i)
+        setattr(TestAuthorizedKeys, "test_%s" % prefix_tmp, ch(items[1], items[2]))
+
+
+def loop_invalid_authorized_keys(keyset):
+    def ch(file_str, expected_error, **kwargs):
+        return lambda self: self.check_invalid_file(file_str, expected_error, **kwargs)
+    for i, items in enumerate(keyset):
+        prefix_tmp = "%s_%s" % (items[0], i)
+        setattr(TestAuthorizedKeys, "test_invalid_%s" % prefix_tmp, ch(items[1], items[2]))
+
+
 loop_valid(list_of_valid_keys, "valid_key")
 loop_valid(list_of_valid_keys_rfc4716, "valid_key_rfc4716")
 loop_invalid(list_of_invalid_keys, "invalid_key")
 loop_options(list_of_valid_options)
 loop_invalid_options(list_of_invalid_options)
+loop_authorized_keys(list_of_authorized_keys)
+loop_invalid_authorized_keys(list_of_invalid_authorized_keys)
 
 if __name__ == '__main__':
     unittest.main()

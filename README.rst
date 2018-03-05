@@ -59,6 +59,23 @@ Usage:
   print(ssh.options_raw)  # None (string of optional options at the beginning of public key)
   print(ssh.options)  # None (options as a dictionary, parsed and validated)
 
+
+Parsing of `authorized_keys` files:
+
+::
+
+  from sshpubkeys import AuthorizedKeysFile
+
+  key_file = AuthorizedKeysFile("""ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD\n"""
+             """#This is a comment\n\n"""
+             """ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAF9QpvUneTvt8"""
+             """lu0ePSuzr7iLE9ZMPu2DFTmqh7BVn89IHuQ5dfg9pArxfHZWgu9lMdlOykVx0I6OXkE35A/mFqwwApyiPmiwno"""
+             """jmRnN//pApl6QQFINHzV/PGOSi599F1Y2tHQwcdb44CPOhkUmHtC9wKazSvw/ivbxNjcMzhhHsWGnA=="""
+             strict=True, disallow_options=True)
+  for key in key_file.keys:
+      print(key.key_type, key.bits, key.hash_512())
+
+
 Options
 -------
 

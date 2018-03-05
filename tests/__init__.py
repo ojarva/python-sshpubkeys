@@ -15,12 +15,7 @@ from .invalid_keys import keys as list_of_invalid_keys
 from .invalid_options import options as list_of_invalid_options
 from .valid_keys import keys as list_of_valid_keys
 from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
-from .invalid_keys import keys as list_of_invalid_keys
 from .valid_options import options as list_of_valid_options
-from .invalid_options import options as list_of_invalid_options
-from .authorized_keys import items as list_of_authorized_keys
-from .invalid_authorized_keys import items as list_of_invalid_authorized_keys
-from io import StringIO
 
 if sys.version_info.major == 2:
     from io import BytesIO as StringIO

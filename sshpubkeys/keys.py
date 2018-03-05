@@ -27,13 +27,36 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 
-from .exceptions import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError,
+                         InvalidTypeError, MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError,
+                         TooShortKeyError, UnknownOptionNameError)
 
-__all__ = ["SSHKey"]
+__all__ = ["AuthorizedKeysFile", "SSHKey"]
+
+
+class AuthorizedKeysFile(object):  # pylint:disable=too-few-public-methods
+    """Represents a full authorized_keys file.
+
+    Comments and empty lines are ignored."""
+
+    def __init__(self, file_obj, **kwargs):
+        self.keys = []
+        self.parse(file_obj, **kwargs)
+
+    def parse(self, file_obj, **kwargs):
+        for line in file_obj:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("#"):
+                continue
+            ssh_key = SSHKey(line, **kwargs)
+            ssh_key.parse()
+            self.keys.append(ssh_key)
 
 
 class SSHKey(object):  # pylint:disable=too-many-instance-attributes
-    """Presents a single SSH keypair.
+    """Represents a single SSH keypair.
 
     ssh_key = SSHKey(key_data, strict=True)
     ssh_key.parse()
@@ -109,6 +132,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                 self.parse(keydata)
             except (InvalidKeyError, NotImplementedError):
                 pass
+
+    def __str__(self):
+        return "Key type: %s, bits: %s, options: %s" % (self.key_type, self.bits, self.options)
 
     def reset(self):
         """Reset all data fields."""

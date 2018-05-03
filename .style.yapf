@@ -1,0 +1,10 @@
+[style]
+based_on_style = pep8
+allow_split_before_dict_value = false
+blank_line_before_nested_class_or_def = false
+coalesce_brackets = true
+column_limit = 125
+dedent_closing_brackets = true
+each_dict_entry_on_separate_line = true
+join_multiple_lines = true
+spaces_around_power_operator = true

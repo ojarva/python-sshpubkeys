@@ -1,5 +1,4 @@
 # pylint:disable=line-too-long
-
 """Parser for ssh public keys. Currently supports ssh-rsa, ssh-dsa, ssh-ed25519 and ssh-dss keys.
 
 import sys
@@ -14,22 +13,21 @@ except InvalidKeyError:
     sys.exit(1)
 print(ssh_key.bits)"""
 
+from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError,
+                         InvalidTypeError, MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError,
+                         TooShortKeyError, UnknownOptionNameError)
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+
 import base64
 import binascii
+import ecdsa
 import hashlib
 import re
 import struct
 import sys
 import warnings
-
-import ecdsa
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
-
-from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError,
-                         InvalidTypeError, MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError,
-                         TooShortKeyError, UnknownOptionNameError)
 
 __all__ = ["AuthorizedKeysFile", "SSHKey"]
 
@@ -180,7 +178,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         remaining_data_length = len(data[current_position:])
 
         if remaining_data_length < requested_data_length:
-            raise MalformedDataError("Requested %s bytes, but only %s bytes available." % (requested_data_length, remaining_data_length))
+            raise MalformedDataError(
+                "Requested %s bytes, but only %s bytes available." % (requested_data_length, remaining_data_length)
+            )
 
         next_data = data[current_position:current_position + requested_data_length]
         # Move pointer to the end of the data field
@@ -312,9 +312,13 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             min_length = self.RSA_MIN_LENGTH_LOOSE
             max_length = self.RSA_MAX_LENGTH_LOOSE
         if self.bits < min_length:
-            raise TooShortKeyError("%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits))
+            raise TooShortKeyError(
+                "%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits)
+            )
         if self.bits > max_length:
-            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits))
+            raise TooLongKeyError(
+                "%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits)
+            )
         return current_position
 
     def _process_ssh_dss(self, data):
@@ -338,7 +342,9 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         if p_bits < min_length:
             raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, p_bits))
         if p_bits > max_length:
-            raise TooLongKeyError("%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, p_bits))
+            raise TooLongKeyError(
+                "%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, p_bits)
+            )
 
         dsa_parameters = DSAParameterNumbers(data_fields["p"], data_fields["q"], data_fields["g"])
         self.dsa = DSAPublicNumbers(data_fields["y"], dsa_parameters).public_key(default_backend())

@@ -4,11 +4,6 @@ New test is generated for each key so that running unittests gives out meaningfu
 
 """
 
-import sys
-import unittest
-
-from sshpubkeys import AuthorizedKeysFile, InvalidOptionsError, SSHKey
-
 from .authorized_keys import items as list_of_authorized_keys
 from .invalid_authorized_keys import items as list_of_invalid_authorized_keys
 from .invalid_keys import keys as list_of_invalid_keys
@@ -16,18 +11,20 @@ from .invalid_options import options as list_of_invalid_options
 from .valid_keys import keys as list_of_valid_keys
 from .valid_keys_rfc4716 import keys as list_of_valid_keys_rfc4716
 from .valid_options import options as list_of_valid_options
+from sshpubkeys import AuthorizedKeysFile, InvalidOptionsError, SSHKey
+
+import sys
+import unittest
 
 if sys.version_info.major == 2:
     from io import BytesIO as StringIO
 else:
     from io import StringIO
 
-
 DEFAULT_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD"
 
 
 class TestMisc(unittest.TestCase):
-
     def test_none_to_constructor(self):
         ssh = SSHKey(None)
         self.assertEqual(None, ssh.keydata)  # Python2.6 does not have assertIsNone
@@ -35,7 +32,6 @@ class TestMisc(unittest.TestCase):
 
 
 class TestKeys(unittest.TestCase):
-
     def check_key(self, pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):  # pylint:disable=too-many-arguments
         """ Checks valid key """
         ssh = SSHKey(pubkey, **kwargs)
@@ -55,7 +51,6 @@ class TestKeys(unittest.TestCase):
 
 
 class TestOptions(unittest.TestCase):
-
     def check_valid_option(self, option, parsed_option):
         ssh = SSHKey()
         parsed = ssh.parse_options(option)
@@ -72,7 +67,6 @@ class TestOptions(unittest.TestCase):
 
 
 class TestAuthorizedKeys(unittest.TestCase):
-
     def check_valid_file(self, file_str, valid_keys_count):
         file_obj = StringIO(file_str)
         key_file = AuthorizedKeysFile(file_obj)
@@ -94,8 +88,10 @@ class TestAuthorizedKeys(unittest.TestCase):
 
 def loop_options(options):
     """ Loop over list of options and dynamically create tests """
+
     def ch(option, parsed_option):
         return lambda self: self.check_valid_option(option, parsed_option)
+
     for i, items in enumerate(options):
         prefix_tmp = "%s_%s" % (items[0], i)
         setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
@@ -104,6 +100,7 @@ def loop_options(options):
 def loop_invalid_options(options):
     def ch(option, expected_error):
         return lambda self: self.check_invalid_option(option, expected_error)
+
     for i, items in enumerate(options):
         prefix_tmp = "%s_%s" % (items[0], i)
         setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
@@ -111,8 +108,10 @@ def loop_invalid_options(options):
 
 def loop_valid(keyset, prefix):
     """ Loop over list of valid keys and dynamically create tests """
+
     def ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs):  # pylint:disable=too-many-arguments
         return lambda self: self.check_key(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs)
+
     for items in keyset:
         modes = items.pop()
         prefix_tmp = "%s_%s" % (prefix, items.pop())
@@ -126,13 +125,18 @@ def loop_valid(keyset, prefix):
                 options = comment = None
             else:
                 pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment = items
-            setattr(TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode), ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs))
+            setattr(
+                TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode),
+                ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs)
+            )
 
 
 def loop_invalid(keyset, prefix):
     """ Loop over list of invalid keys and dynamically create tests """
+
     def ch(pubkey, expected_error, **kwargs):
         return lambda self: self.check_fail(pubkey, expected_error, **kwargs)
+
     for items in keyset:
         modes = items.pop()
         prefix_tmp = "%s_%s" % (prefix, items.pop())
@@ -148,6 +152,7 @@ def loop_invalid(keyset, prefix):
 def loop_authorized_keys(keyset):
     def ch(file_str, valid_keys_count):
         return lambda self: self.check_valid_file(file_str, valid_keys_count)
+
     for i, items in enumerate(keyset):
         prefix_tmp = "%s_%s" % (items[0], i)
         setattr(TestAuthorizedKeys, "test_%s" % prefix_tmp, ch(items[1], items[2]))
@@ -156,6 +161,7 @@ def loop_authorized_keys(keyset):
 def loop_invalid_authorized_keys(keyset):
     def ch(file_str, expected_error, **kwargs):
         return lambda self: self.check_invalid_file(file_str, expected_error, **kwargs)
+
     for i, items in enumerate(keyset):
         prefix_tmp = "%s_%s" % (items[0], i)
         setattr(TestAuthorizedKeys, "test_invalid_%s" % prefix_tmp, ch(items[1], items[2]))

@@ -16,15 +16,12 @@ setup(
     author='Olli Jarva',
     author_email='olli@jarva.fi',
     license='BSD',
-
     classifiers=[
         'Development Status :: 4 - Beta',
-
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Topic :: Security',
         'License :: OSI Approved :: BSD License',
-
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
@@ -37,8 +34,7 @@ setup(
     packages=["sshpubkeys"],
     test_suite="tests",
     install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],
-
     extras_require={
-        'dev': ['twine', 'wheel'],
+        'dev': ['twine', 'wheel', 'yapf'],
     },
 )

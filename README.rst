@@ -64,12 +64,13 @@ Parsing of `authorized_keys` files:
 
 ::
 
+  import os
   from sshpubkeys import AuthorizedKeysFile
-  f = open("/home/username/.ssh/authorized_keys", "r")
+  f = open(os.environ["HOME"] + "/.ssh/authorized_keys", "r")
   key_file = AuthorizedKeysFile(f, strict=False)
 
   for key in key_file.keys:
-      print(key.key_type, key.bits, key.comment)
+      print(key.key_type, key.bits, key.hash_sha512())
 
 
 Options

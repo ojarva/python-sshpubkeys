@@ -1,0 +1,5 @@
+[format]
+max-line-length=125
+
+[messages control]
+disable=line-too-long,missing-docstring,no-self-use,fixme,bad-indentation,bad-continuation,invalid-name,too-many-locals,duplicate-code,too-many-branches,wrong-import-order

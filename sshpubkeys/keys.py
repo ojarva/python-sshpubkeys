@@ -132,7 +132,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
                 pass
 
     def __str__(self):
-        return "Key type: %s, bits: %s, options: %s" % (self.key_type, self.bits, self.options)
+        return "Key type: %s, bits: %s, options: %s" % (self.key_type.decode(), self.bits, self.options)
 
     def reset(self):
         """Reset all data fields."""
@@ -313,11 +313,11 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             max_length = self.RSA_MAX_LENGTH_LOOSE
         if self.bits < min_length:
             raise TooShortKeyError(
-                "%s key data can not be shorter than %s bits (was %s)" % (self.key_type, min_length, self.bits)
+                "%s key data can not be shorter than %s bits (was %s)" % (self.key_type.decode(), min_length, self.bits)
             )
         if self.bits > max_length:
             raise TooLongKeyError(
-                "%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, self.bits)
+                "%s key data can not be longer than %s bits (was %s)" % (self.key_type.decode(), max_length, self.bits)
             )
         return current_position
 
@@ -340,10 +340,10 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             min_length = self.DSA_MIN_LENGTH_LOOSE
             max_length = self.DSA_MAX_LENGTH_LOOSE
         if p_bits < min_length:
-            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, p_bits))
+            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type.decode(), min_length, p_bits))
         if p_bits > max_length:
             raise TooLongKeyError(
-                "%s key data can not be longer than %s bits (was %s)" % (self.key_type, max_length, p_bits)
+                "%s key data can not be longer than %s bits (was %s)" % (self.key_type.decode(), max_length, p_bits)
             )
 
         dsa_parameters = DSAParameterNumbers(data_fields["p"], data_fields["q"], data_fields["g"])
@@ -398,7 +398,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         elif self.key_type == b"ssh-ed25519":
             return self._process_ed25516(data)
         else:
-            raise NotImplementedError("Invalid key type: %s" % self.key_type)
+            raise NotImplementedError("Invalid key type: %s" % self.key_type.decode())
 
     def parse(self, keydata=None):
         """Validates SSH public key.
@@ -432,7 +432,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         # Check key type
         current_position, unpacked_key_type = self._unpack_by_int(self._decoded_key, 0)
         if key_type is not None and key_type != unpacked_key_type.decode():
-            raise InvalidTypeError("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type))
+            raise InvalidTypeError("Keytype mismatch: %s != %s" % (key_type, unpacked_key_type.decode()))
 
         self.key_type = unpacked_key_type
 

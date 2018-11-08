@@ -16,7 +16,11 @@ print(ssh_key.bits)"""
 from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError,
                          InvalidTypeError, MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError,
                          TooShortKeyError, UnknownOptionNameError)
+from cryptography import utils
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.backends.interfaces import DSABackend
+from cryptography.hazmat.backends.openssl.backend import Backend
+from cryptography.hazmat.backends.openssl.dsa import _DSAPublicKey
 from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 
@@ -30,6 +34,33 @@ import sys
 import warnings
 
 __all__ = ["AuthorizedKeysFile", "SSHKey"]
+
+
+@utils.register_interface(DSABackend)
+class NonStandardDSAKeyLengthBackend(Backend):
+    def load_dsa_public_numbers(self, numbers):
+        """
+        This code is just the `Backend.load_dsa_public_numbers()` function from cryptography 2.3.1 without
+        `dsa._check_dsa_parameters(numbers.parameter_numbers)`.
+        https://github.com/pyca/cryptography/blob/983b35e7b0b76e687889f755d62c3a95dd485944/src/cryptography/hazmat/backends/openssl/backend.py#L627
+
+        A discussion about this can be found in this github issue:
+        https://github.com/pyca/cryptography/issues/4108
+        """
+        dsa_cdata = self._lib.DSA_new()
+        self.openssl_assert(dsa_cdata != self._ffi.NULL)
+        dsa_cdata = self._ffi.gc(dsa_cdata, self._lib.DSA_free)
+
+        p = self._int_to_bn(numbers.parameter_numbers.p)
+        q = self._int_to_bn(numbers.parameter_numbers.q)
+        g = self._int_to_bn(numbers.parameter_numbers.g)
+        pub_key = self._int_to_bn(numbers.y)
+        priv_key = self._ffi.NULL
+        self._dsa_cdata_set_values(dsa_cdata, p, q, g, pub_key, priv_key)
+
+        evp_pkey = self._dsa_cdata_to_evp_pkey(dsa_cdata)
+
+        return _DSAPublicKey(self, dsa_cdata, evp_pkey)
 
 
 class AuthorizedKeysFile(object):  # pylint:disable=too-few-public-methods
@@ -67,6 +98,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     DSA_MAX_LENGTH_STRICT = 1024
     DSA_MIN_LENGTH_LOOSE = 1
     DSA_MAX_LENGTH_LOOSE = 3072
+    DSA_STANDARD_KEY_LENGTHS = [1024, 2048, 3072]
 
     DSA_N_LENGTH = 160
 
@@ -333,12 +365,15 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
         p_bits = self._bits_in_number(data_fields["p"])
         if q_bits != self.DSA_N_LENGTH:
             raise InvalidKeyError("Incorrect DSA key parameters: bits(p)=%s, q=%s" % (self.bits, q_bits))
+        backend = default_backend()
         if self.strict_mode:
             min_length = self.DSA_MIN_LENGTH_STRICT
             max_length = self.DSA_MAX_LENGTH_STRICT
         else:
             min_length = self.DSA_MIN_LENGTH_LOOSE
             max_length = self.DSA_MAX_LENGTH_LOOSE
+            if p_bits not in self.DSA_STANDARD_KEY_LENGTHS:
+                backend = NonStandardDSAKeyLengthBackend()
         if p_bits < min_length:
             raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type, min_length, p_bits))
         if p_bits > max_length:
@@ -347,7 +382,7 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
             )
 
         dsa_parameters = DSAParameterNumbers(data_fields["p"], data_fields["q"], data_fields["g"])
-        self.dsa = DSAPublicNumbers(data_fields["y"], dsa_parameters).public_key(default_backend())
+        self.dsa = DSAPublicNumbers(data_fields["y"], dsa_parameters).public_key(backend)
         self.bits = self.dsa.key_size
 
         return current_position

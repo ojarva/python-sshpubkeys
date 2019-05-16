@@ -32,7 +32,7 @@ import warnings
 __all__ = ["AuthorizedKeysFile", "SSHKey"]
 
 
-class AuthorizedKeysFile(object):  # pylint:disable=too-few-public-methods
+class AuthorizedKeysFile:  # pylint:disable=too-few-public-methods
     """Represents a full authorized_keys file.
 
     Comments and empty lines are ignored."""
@@ -53,7 +53,7 @@ class AuthorizedKeysFile(object):  # pylint:disable=too-few-public-methods
             self.keys.append(ssh_key)
 
 
-class SSHKey(object):  # pylint:disable=too-many-instance-attributes
+class SSHKey:  # pylint:disable=too-many-instance-attributes
     """Represents a single SSH keypair.
 
     ssh_key = SSHKey(key_data, strict=True)
@@ -391,14 +391,13 @@ class SSHKey(object):  # pylint:disable=too-many-instance-attributes
     def _process_key(self, data):
         if self.key_type == b"ssh-rsa":
             return self._process_ssh_rsa(data)
-        elif self.key_type == b"ssh-dss":
+        if self.key_type == b"ssh-dss":
             return self._process_ssh_dss(data)
-        elif self.key_type.strip().startswith(b"ecdsa-sha"):
+        if self.key_type.strip().startswith(b"ecdsa-sha"):
             return self._process_ecdsa_sha(data)
-        elif self.key_type == b"ssh-ed25519":
+        if self.key_type == b"ssh-ed25519":
             return self._process_ed25516(data)
-        else:
-            raise NotImplementedError("Invalid key type: %s" % self.key_type.decode())
+        raise NotImplementedError("Invalid key type: %s" % self.key_type.decode())
 
     def parse(self, keydata=None):
         """Validates SSH public key.

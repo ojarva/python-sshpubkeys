@@ -1,2 +1,2 @@
-include README.rst
+include README.rst LICENSE.txt requirements.txt .travis.yml
 graft tests

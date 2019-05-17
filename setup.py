@@ -31,6 +31,7 @@ setup(
     ],
     keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
     packages=["sshpubkeys"],
+    packages=find_packages(exclude=['tests']),
     test_suite="tests",
     install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],
     extras_require={

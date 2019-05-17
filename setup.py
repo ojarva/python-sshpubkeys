@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 from codecs import open as codecs_open
 from os import path
 
@@ -30,7 +30,6 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
-    packages=["sshpubkeys"],
     packages=find_packages(exclude=['tests']),
     test_suite="tests",
     install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],

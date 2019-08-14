@@ -114,6 +114,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
     def __init__(self, keydata=None, **kwargs):
         self.keydata = keydata
         self._decoded_key = None
+        self.b64_key = None
         self.rsa = None
         self.dsa = None
         self.ecdsa = None
@@ -426,6 +427,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
             key_type = key_parts[0]
             pubkey_content = key_parts[1]
 
+        self.b64_key = pubkey_content
         self._decoded_key = self.decode_key(pubkey_content)
 
         # Check key type

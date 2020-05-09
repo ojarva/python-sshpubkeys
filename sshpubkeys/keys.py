@@ -143,7 +143,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         """Calculate md5 fingerprint.
 
         Deprecated, use .hash_md5() instead."""
-        warnings.warn("hash() is deprecated. Use hash_md5(), hash_sha256() or hash_sha512() instead.")
+        warnings.warn("hash() is deprecated. Use hash_md5(), hash_sha1(), hash_sha256() or hash_sha512() instead.")
         return self.hash_md5().replace(b"MD5:", b"")
 
     def hash_md5(self):
@@ -154,6 +154,11 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         For specification, see RFC4716, section 4."""
         fp_plain = hashlib.md5(self._decoded_key).hexdigest()
         return "MD5:" + ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
+    
+    def hash_sha1(self):
+        """Calculate sha1 fingerprint."""
+        fp_plain = hashlib.sha1(self._decoded_key).digest()
+        return (b"SHA1:" + base64.b64encode(fp_plain).replace(b"=", b"")).decode("utf-8")
 
     def hash_sha256(self):
         """Calculate sha256 fingerprint."""

@@ -154,7 +154,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         For specification, see RFC4716, section 4."""
         fp_plain = hashlib.md5(self._decoded_key).hexdigest()
         return "MD5:" + ':'.join(a + b for a, b in zip(fp_plain[::2], fp_plain[1::2]))
-    
+
     def hash_sha1(self):
         """Calculate sha1 fingerprint."""
         fp_plain = hashlib.sha1(self._decoded_key).digest()

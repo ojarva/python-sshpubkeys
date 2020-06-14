@@ -19,6 +19,7 @@ from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNa
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+from urllib.parse import urlparse
 
 import base64
 import binascii
@@ -204,7 +205,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
     def _split_key(self, data):
         options_raw = None
         # Terribly inefficient way to remove options, but hey, it works.
-        if not data.startswith("ssh-") and not data.startswith("ecdsa-"):
+        if not data.startswith("ssh-") and not data.startswith("ecdsa-") and not data.startswith("sk-"):
             quote_open = False
             for i, character in enumerate(data):
                 if character == '"':  # only double quotes are allowed, no need to care about single quotes
@@ -388,6 +389,32 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
             raise InvalidKeyLengthError("ed25519 keys must be 256 bits (was %s bits)" % self.bits)
         return current_position
 
+    def _validate_application_string(self, application):
+        """Validates Application string.
+
+        Has to be an URL starting with "ssh:". See ssh-keygen(1)."""
+
+        try:
+            parsed_url = urlparse(application)
+        except ValueError as error:
+            raise InvalidKeyError("Application string: %s" % error)
+        if parsed_url.scheme != b"ssh":
+            raise InvalidKeyError('Application string must begin with "ssh:"')
+
+    def _process_sk_ecdsa_sha(self, data):
+        """Parses sk_ecdsa-sha public keys."""
+        current_position = self._process_ecdsa_sha(data)
+        current_position, application = self._unpack_by_int(data, current_position)
+        self._validate_application_string(application)
+        return current_position
+
+    def _process_sk_ed25519(self, data):
+        """Parses sk_ed25519 public keys."""
+        current_position = self._process_ed25516(data)
+        current_position, application = self._unpack_by_int(data, current_position)
+        self._validate_application_string(application)
+        return current_position
+
     def _process_key(self, data):
         if self.key_type == b"ssh-rsa":
             return self._process_ssh_rsa(data)
@@ -397,6 +424,10 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
             return self._process_ecdsa_sha(data)
         if self.key_type == b"ssh-ed25519":
             return self._process_ed25516(data)
+        if self.key_type.strip().startswith(b"sk-ecdsa-sha"):
+            return self._process_sk_ecdsa_sha(data)
+        if self.key_type.strip().startswith(b"sk-ssh-ed25519"):
+            return self._process_sk_ed25519(data)
         raise NotImplementedError("Invalid key type: %s" % self.key_type.decode())
 
     def parse(self, keydata=None):

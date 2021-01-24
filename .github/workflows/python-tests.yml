@@ -21,9 +21,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pycodestyle isort pylint yapf
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Check import sorting
-      run: |
-        isort --diff --check --recursive sshpubkeys tests
     - name: Check pycodestyle
       run: |
         pycodestyle --ignore E501,E402 --exclude=.git,dev3 sshpubkeys tests
@@ -35,5 +32,5 @@ jobs:
         python3 setup.py test
     - name: Check formatting
       run: |
-        isort --recursive sshpubkeys tests; yapf --recursive .
+        isort --recursive sshpubkeys tests; yapf --recursive -i .
         git diff --exit-code  # This fails if isort&yapf combo made any changes

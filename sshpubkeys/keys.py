@@ -13,9 +13,10 @@ except InvalidKeyError:
     sys.exit(1)
 print(ssh_key.bits)"""
 
-from .exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError,
-                         InvalidTypeError, MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError,
-                         TooShortKeyError, UnknownOptionNameError)
+from .exceptions import (
+    InvalidKeyError, InvalidKeyLengthError, InvalidOptionNameError, InvalidOptionsError, InvalidTypeError,
+    MalformedDataError, MissingMandatoryOptionValueError, TooLongKeyError, TooShortKeyError, UnknownOptionNameError
+)
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
@@ -341,7 +342,9 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
             min_length = self.DSA_MIN_LENGTH_LOOSE
             max_length = self.DSA_MAX_LENGTH_LOOSE
         if p_bits < min_length:
-            raise TooShortKeyError("%s key can not be shorter than %s bits (was %s)" % (self.key_type.decode(), min_length, p_bits))
+            raise TooShortKeyError(
+                "%s key can not be shorter than %s bits (was %s)" % (self.key_type.decode(), min_length, p_bits)
+            )
         if p_bits > max_length:
             raise TooLongKeyError(
                 "%s key data can not be longer than %s bits (was %s)" % (self.key_type.decode(), max_length, p_bits)

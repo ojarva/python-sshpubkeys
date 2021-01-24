@@ -396,8 +396,8 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
 
         try:
             parsed_url = urlparse(application)
-        except ValueError as error:
-            raise InvalidKeyError("Application string: %s" % error)
+        except ValueError as err:
+            raise InvalidKeyError(f"Application string: {err}") from err
         if parsed_url.scheme != b"ssh":
             raise InvalidKeyError('Application string must begin with "ssh:"')
 

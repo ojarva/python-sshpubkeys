@@ -82,4 +82,12 @@ keys = [
         'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAYQbdtLTII+vP98NSDlK2LXxVARELRYO0NODFYQ0imYxsmBMB7BrfljFppLJyjU6cziOT6YFj6rVd8MmCogdCR32u63EV11uT6RCFfJMQJtIi+B1JJipTxLzURsiUOOgAHJc= ojarva@ojar-laptop.local',
         TooShortKeyError, "rsa_771", ["strict"]
     ],
+    [
+        'sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIJ+CG2daFaeUC2GMvxGe5bTXRxforrL3MNOcsxbMbQeHAAAABGludjo=',
+        InvalidKeyError, 'invalid_appid_sk-ssh-ed25519', ["loose", "strict"]
+    ],
+    [
+        'sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIHIoT5FA++PiJ4g4cORu3DBK4HWBO8mMjbp1Jtp4twl4AAAAB3NzaDovL1s=',
+        InvalidKeyError, 'invalid_url_sk-ssh-ed25519', ["loose", "strict"]
+    ],
 ]

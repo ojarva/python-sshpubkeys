@@ -218,4 +218,12 @@ keys = [[
     'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL5x8+1ucT6+AKQIW8u5W/FOuBvWx2fCQlSLkUakry89', 256,
     'MD5:0c:4e:13:0f:f3:ab:20:58:85:2e:79:9b:0f:2b:43:c8', 'SHA256:2ao9ds3IIkmXiLPRMs/47HIkHIV/qxzEHKW8p9lhRYA', "ed25516_2",
     ["strict", "loose"]
+], [
+    'sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGdtNJ7nNTVW3kXvrWpvTENCfetzI2yUb8m5WLB2kcOVqF+3orTmloZsQEt1K386hlaqNzm7MVB+xcAiNoqhiI4AAAAEc3NoOg==',
+    256, 'MD5:ea:34:1c:a3:8b:8e:fe:07:0c:b0:36:fa:db:ce:b4:58', 'SHA256:HGA+EGN7vROCadhXckS5/hwCluETf1cPA92A9+RTgxw',
+    'sk-ecdsa-sha2-nistp256_1', ["strict", "loose"]
+], [
+    'sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAID92A9iaZ6WS0dcc4qsxuUfMgwFuFeh48faLjYlaYXswAAAABHNzaDo=',
+    256, 'MD5:0b:87:18:2a:09:e7:a9:77:73:cd:3d:83:83:77:ea:83', 'SHA256:Uz5X82+UKm4CiOdqnfAtV/5JfnysqPHt1Is0iGnD70g',
+    'sk-ssh-ed25519_1', ["strict", "loose"]
 ]]

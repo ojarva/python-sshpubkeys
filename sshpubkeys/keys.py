@@ -85,23 +85,26 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
     RSA_MIN_LENGTH_LOOSE = 768
     RSA_MAX_LENGTH_LOOSE = 16384
 
-    # Valid as of OpenSSH_6.9p1
+    # Valid as of OpenSSH_8.3
     # argument name, value is mandatory. Options are case-insensitive, but this list must be in lowercase.
     OPTIONS_SPEC = [
         ("agent-forwarding", False),
         ("cert-authority", False),
         ("command", True),
         ("environment", True),
+        ("expiry-time", True),
         ("from", True),
         ("no-agent-forwarding", False),
         ("no-port-forwarding", False),
         ("no-pty", False),
         ("no-user-rc", False),
         ("no-x11-forwarding", False),
+        ("permitlisten", True),
         ("permitopen", True),
         ("port-forwarding", False),
         ("principals", True),
         ("pty", False),
+        ("no-touch-required", False),
         ("restrict", False),
         ("tunnel", True),
         ("user-rc", False),

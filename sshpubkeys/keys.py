@@ -262,15 +262,15 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
                 opt_name = opt
                 opt_value = True
             if " " in opt_name or not self.OPTION_NAME_RE.match(opt_name):
-                raise InvalidOptionNameError("%s is not valid option name." % opt_name)
+                raise InvalidOptionNameError("%s is not a valid option name." % opt_name)
             if self.strict_mode:
                 for valid_opt_name, value_required in self.OPTIONS_SPEC:
                     if opt_name.lower() == valid_opt_name:
                         if value_required and opt_value is True:
-                            raise MissingMandatoryOptionValueError("%s is missing mandatory value." % opt_name)
+                            raise MissingMandatoryOptionValueError("%s is missing a mandatory value." % opt_name)
                         break
                 else:
-                    raise UnknownOptionNameError("%s is unrecognized option name." % opt_name)
+                    raise UnknownOptionNameError("%s is an unrecognized option name." % opt_name)
             if opt_name not in parsed_options:
                 parsed_options[opt_name] = []
             parsed_options[opt_name].append(opt_value)

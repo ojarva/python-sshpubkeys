@@ -1,8 +1,7 @@
 OpenSSH Public Key Parser for Python
 ====================================
 
-.. image:: https://travis-ci.org/ojarva/python-sshpubkeys.svg?branch=master
-    :target: https://travis-ci.org/ojarva/python-sshpubkeys
+.. image:: https://github.com/ojarva/python-sshpubkeys/workflows/Run%20python%20tests/badge.svg
 
 Major changes between versions 2 and 3
 --------------------------------------

@@ -1,0 +1,39 @@
+name: Run python tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pycodestyle isort pylint yapf
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Check import sorting
+      run: |
+        isort --diff --check --recursive sshpubkeys tests
+    - name: Check pycodestyle
+      run: |
+        pycodestyle --ignore E501,E402 --exclude=.git,dev3 sshpubkeys tests
+    - name: Run pylint
+      run: |
+        pylint sshpubkeys tests
+    - name: Run tests
+      run: |
+        python3 setup.py test
+    - name: Check formatting
+      run: |
+        isort --recursive sshpubkeys tests; yapf --recursive .
+        git diff --exit-code  # This fails if isort&yapf combo made any changes

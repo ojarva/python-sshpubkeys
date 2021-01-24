@@ -170,8 +170,8 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         # Unpack length of data field
         try:
             requested_data_length = struct.unpack('>I', data[current_position:current_position + self.INT_LEN])[0]
-        except struct.error:
-            raise MalformedDataError("Unable to unpack %s bytes from the data" % self.INT_LEN)
+        except struct.error as ex:
+            raise MalformedDataError("Unable to unpack %s bytes from the data" % self.INT_LEN) from ex
 
         # Move pointer to the beginning of the data field
         current_position += self.INT_LEN
@@ -240,8 +240,8 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         """Decode base64 coded part of the key."""
         try:
             decoded_key = base64.b64decode(pubkey_content.encode("ascii"))
-        except (TypeError, binascii.Error):
-            raise MalformedDataError("Unable to decode the key")
+        except (TypeError, binascii.Error) as ex:
+            raise MalformedDataError("Unable to decode the key") from ex
         return decoded_key
 
     @classmethod
@@ -363,8 +363,8 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         try:
             # data starts with \x04, which should be discarded.
             ecdsa_key = ecdsa.VerifyingKey.from_string(key_data[1:], curve, hash_algorithm)
-        except AssertionError:
-            raise InvalidKeyError("Invalid ecdsa key")
+        except AssertionError as ex:
+            raise InvalidKeyError("Invalid ecdsa key") from ex
         self.bits = int(curve_information.replace(b"nistp", b""))
         self.ecdsa = ecdsa_key
         return current_position

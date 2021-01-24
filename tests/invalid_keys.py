@@ -1,5 +1,6 @@
-from sshpubkeys.exceptions import (InvalidKeyError, InvalidKeyLengthError, InvalidTypeError, MalformedDataError,
-                                   TooLongKeyError, TooShortKeyError)
+from sshpubkeys.exceptions import (
+    InvalidKeyError, InvalidKeyLengthError, InvalidTypeError, MalformedDataError, TooLongKeyError, TooShortKeyError
+)
 
 keys = [
     [

@@ -9,7 +9,7 @@ with codecs_open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='sshpubkeys',
-    version='3.2.0',
+    version='3.3.0',
     description='SSH public key parser',
     long_description=long_description,
     url='https://github.com/ojarva/python-sshpubkeys',
@@ -31,6 +31,7 @@ setup(
     keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
     packages=["sshpubkeys"],
     test_suite="tests",
+    python_requires='>=3',
     install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],
     extras_require={
         'dev': ['twine', 'wheel', 'yapf'],

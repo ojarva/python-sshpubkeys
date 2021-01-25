@@ -31,6 +31,7 @@ setup(
     keywords='ssh pubkey public key openssh ssh-rsa ssh-dss ssh-ed25519',
     packages=["sshpubkeys"],
     test_suite="tests",
+    python_requires='>=3',
     install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],
     extras_require={
         'dev': ['twine', 'wheel', 'yapf'],

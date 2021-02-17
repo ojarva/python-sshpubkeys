@@ -198,6 +198,11 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         for field in self.FIELDS:
             setattr(self, field, None)
 
+    @property
+    def key(self):
+        """Base64 encoded key"""
+        return base64.b64encode(self._decoded_key)
+
     def hash(self):
         """Calculate md5 fingerprint.
 

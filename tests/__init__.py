@@ -57,6 +57,10 @@ class TestKeys(unittest.TestCase):
         ssh_key = SSHKey(pubkey, **kwargs)
         self.assertRaises(expected_error, ssh_key.parse)
 
+    def test_key_property(self):
+        ssh = SSHKey(DEFAULT_KEY)
+        self.assertEqual(ssh.key, DEFAULT_KEY.split()[1].encode())
+
 
 class TestOptions(unittest.TestCase):
     def check_valid_option(self, option, parsed_option):

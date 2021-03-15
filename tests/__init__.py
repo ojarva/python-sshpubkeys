@@ -42,6 +42,14 @@ class TestKeys(unittest.TestCase):
         self.assertEqual(ssh.comment, comment)
         if fingerprint_sha256 is not None:
             self.assertEqual(ssh.hash_sha256(), fingerprint_sha256)
+        if ssh.ecdsa:
+            ec = ssh.ecdsa
+            repr(ec)
+            ec.to_pem()
+            ec.to_der()
+            ec.to_string("raw")
+            ec.to_string("uncompressed")
+            ec.to_string("compressed")
 
     def check_fail(self, pubkey, expected_error, **kwargs):
         """ Checks that key check raises specified exception """

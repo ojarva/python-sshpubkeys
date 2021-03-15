@@ -33,7 +33,7 @@ setup(
     packages=["sshpubkeys"],
     test_suite="tests",
     python_requires='>=3',
-    install_requires=['cryptography>=2.1.4', 'ecdsa>=0.13'],
+    install_requires=['cryptography>=2.5'],
     extras_require={
         'dev': ['twine', 'wheel', 'yapf'],
     },

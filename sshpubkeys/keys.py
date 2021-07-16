@@ -20,11 +20,14 @@ from .exceptions import (
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.dsa import DSAParameterNumbers, DSAPublicNumbers
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
+from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import hashes
 from urllib.parse import urlparse
 
 import base64
 import binascii
-import ecdsa
 import hashlib
 import re
 import struct
@@ -32,6 +35,57 @@ import sys
 import warnings
 
 __all__ = ["AuthorizedKeysFile", "SSHKey"]
+
+
+class _ECVerifyingKey:
+    """ecdsa.key.VerifyingKey reimplementation
+    """
+    def __init__(self, pubkey, default_hashfunc):
+        self.pubkey = pubkey
+        self.default_hashfunc = default_hashfunc
+
+    @property
+    def curve(self):
+        """Curve instance"""
+        return self.pubkey.curve
+
+    def __repr__(self):
+        pub_key = self.to_string("compressed")
+        self.to_string("raw")
+        return "VerifyingKey({0!r}, {1!r}, {2})".format(
+            pub_key, self.curve.name, self.default_hashfunc.name
+        )
+
+    def to_string(self, encoding="raw"):
+        """Pub key as bytes string"""
+        if encoding == "raw":
+            return self.pubkey.public_numbers().encode_point()[1:]
+        elif encoding == "uncompressed":
+            return self.pubkey.public_numbers().encode_point()
+        elif encoding == "compressed":
+            return self.pubkey.public_bytes(Encoding.X962, PublicFormat.CompressedPoint)
+        else:
+            raise ValueError(encoding)
+
+    def to_pem(self, point_encoding="uncompressed"):
+        """Pub key as PEM"""
+        if point_encoding != "uncompressed":
+            raise ValueError(point_encoding)
+        return self.pubkey.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
+
+    def to_der(self, point_encoding="uncompressed"):
+        """Pub key as ASN.1/DER"""
+        if point_encoding != "uncompressed":
+            raise ValueError(point_encoding)
+        return self.pubkey.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
+
+    def verify(self, signature, data):
+        """Verify signature of provided data"""
+        return self.pubkey.verify(signature, data, ec.ECDSA(self.default_hashfunc))
+
+    def verify_digest(self, signature, digest):
+        """Verify signature over prehashed digest"""
+        return self.pubkey.verify(signature, data, ec.ECDSA(Prehashed(digest)))
 
 
 class AuthorizedKeysFile:  # pylint:disable=too-few-public-methods
@@ -73,11 +127,11 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
     DSA_N_LENGTH = 160
 
     ECDSA_CURVE_DATA = {
-        b"nistp256": (ecdsa.curves.NIST256p, hashlib.sha256),
-        b"nistp192": (ecdsa.curves.NIST192p, hashlib.sha256),
-        b"nistp224": (ecdsa.curves.NIST224p, hashlib.sha256),
-        b"nistp384": (ecdsa.curves.NIST384p, hashlib.sha384),
-        b"nistp521": (ecdsa.curves.NIST521p, hashlib.sha512),
+        b"nistp256": (ec.SECP256R1(), hashes.SHA256()),
+        b"nistp192": (ec.SECP192R1(), hashes.SHA256()),
+        b"nistp224": (ec.SECP224R1(), hashes.SHA256()),
+        b"nistp384": (ec.SECP384R1(), hashes.SHA384()),
+        b"nistp521": (ec.SECP521R1(), hashes.SHA512())
     }
 
     RSA_MIN_LENGTH_STRICT = 1024
@@ -368,12 +422,13 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
 
         current_position, key_data = self._unpack_by_int(data, current_position)
         try:
-            # data starts with \x04, which should be discarded.
-            ecdsa_key = ecdsa.VerifyingKey.from_string(key_data[1:], curve, hash_algorithm)
-        except AssertionError as ex:
+            ecdsa_pubkey = ec.EllipticCurvePublicKey.from_encoded_point(
+                curve, key_data
+            )
+        except ValueError as ex:
             raise InvalidKeyError("Invalid ecdsa key") from ex
-        self.bits = int(curve_information.replace(b"nistp", b""))
-        self.ecdsa = ecdsa_key
+        self.bits = curve.key_size
+        self.ecdsa = _ECVerifyingKey(ecdsa_pubkey, hash_algorithm)
         return current_position
 
     def _process_ed25516(self, data):

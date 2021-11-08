@@ -105,8 +105,8 @@ def loop_options(options):
         return lambda self: self.check_valid_option(option, parsed_option)
 
     for i, items in enumerate(options):
-        prefix_tmp = "%s_%s" % (items[0], i)
-        setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
+        prefix_tmp = f"{items[0]}_{i}"
+        setattr(TestOptions, f"test_{prefix_tmp}", ch(items[1], items[2]))
 
 
 def loop_invalid_options(options):
@@ -114,8 +114,8 @@ def loop_invalid_options(options):
         return lambda self: self.check_invalid_option(option, expected_error)
 
     for i, items in enumerate(options):
-        prefix_tmp = "%s_%s" % (items[0], i)
-        setattr(TestOptions, "test_%s" % prefix_tmp, ch(items[1], items[2]))
+        prefix_tmp = f"{items[0]}_{i}"
+        setattr(TestOptions, f"test_{prefix_tmp}", ch(items[1], items[2]))
 
 
 def loop_valid(keyset, prefix):
@@ -126,7 +126,7 @@ def loop_valid(keyset, prefix):
 
     for items in keyset:
         modes = items.pop()
-        prefix_tmp = "%s_%s" % (prefix, items.pop())
+        prefix_tmp = f"{prefix}_{items.pop()}"
         for mode in modes:
             if mode == "strict":
                 kwargs = {"strict": True}
@@ -138,7 +138,7 @@ def loop_valid(keyset, prefix):
             else:
                 pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment = items
             setattr(
-                TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode),
+                TestKeys, f"test_{prefix_tmp}_mode_{mode}",
                 ch(pubkey, bits, fingerprint_md5, fingerprint_sha256, options, comment, **kwargs)
             )
 
@@ -151,14 +151,14 @@ def loop_invalid(keyset, prefix):
 
     for items in keyset:
         modes = items.pop()
-        prefix_tmp = "%s_%s" % (prefix, items.pop())
+        prefix_tmp = f"{prefix}_{items.pop()}"
         for mode in modes:
             if mode == "strict":
                 kwargs = {"strict": True}
             else:
                 kwargs = {"strict": False}
             pubkey, expected_error = items
-            setattr(TestKeys, "test_%s_mode_%s" % (prefix_tmp, mode), ch(pubkey, expected_error, **kwargs))
+            setattr(TestKeys, f"test_{prefix_tmp}_mode_{mode}", ch(pubkey, expected_error, **kwargs))
 
 
 def loop_authorized_keys(keyset):
@@ -166,8 +166,8 @@ def loop_authorized_keys(keyset):
         return lambda self: self.check_valid_file(file_str, valid_keys_count)
 
     for i, items in enumerate(keyset):
-        prefix_tmp = "%s_%s" % (items[0], i)
-        setattr(TestAuthorizedKeys, "test_%s" % prefix_tmp, ch(items[1], items[2]))
+        prefix_tmp = f"{items[0]}_{i}"
+        setattr(TestAuthorizedKeys, f"test_{prefix_tmp}", ch(items[1], items[2]))
 
 
 def loop_invalid_authorized_keys(keyset):
@@ -175,8 +175,8 @@ def loop_invalid_authorized_keys(keyset):
         return lambda self: self.check_invalid_file(file_str, expected_error, **kwargs)
 
     for i, items in enumerate(keyset):
-        prefix_tmp = "%s_%s" % (items[0], i)
-        setattr(TestAuthorizedKeys, "test_invalid_%s" % prefix_tmp, ch(items[1], items[2]))
+        prefix_tmp = f"{items[0]}_{i}"
+        setattr(TestAuthorizedKeys, f"test_invalid_{prefix_tmp}", ch(items[1], items[2]))
 
 
 loop_valid(list_of_valid_keys, "valid_key")

@@ -199,24 +199,24 @@ keys = [[
     'joku@vps91201', 'ecdsa_sha2_nistp521', ["strict", "loose"]
 ], [
     'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD', 256,
-    'MD5:76:85:77:0d:24:6c:1e:d3:23:c4:29:92:80:f9:fb:94', 'SHA256:uG85B9hYCFenm0DxEo3PRzypYRY3kSa7veE/KbSSau0', 'ed25516_1',
+    'MD5:76:85:77:0d:24:6c:1e:d3:23:c4:29:92:80:f9:fb:94', 'SHA256:uG85B9hYCFenm0DxEo3PRzypYRY3kSa7veE/KbSSau0', 'ed25519_1',
     ["strict", "loose"]
 ], [
     'command="/bin/ls",no-agent-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD',
     256, 'MD5:76:85:77:0d:24:6c:1e:d3:23:c4:29:92:80:f9:fb:94', 'SHA256:uG85B9hYCFenm0DxEo3PRzypYRY3kSa7veE/KbSSau0',
-    'command="/bin/ls",no-agent-forwarding,no-user-rc', None, 'ed25516_with_command_1', ["strict", "loose"]
+    'command="/bin/ls",no-agent-forwarding,no-user-rc', None, 'ed25519_with_command_1', ["strict", "loose"]
 ], [
     'command="/bin/ls",no-agent-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD random comment for this key',
     256, 'MD5:76:85:77:0d:24:6c:1e:d3:23:c4:29:92:80:f9:fb:94', 'SHA256:uG85B9hYCFenm0DxEo3PRzypYRY3kSa7veE/KbSSau0',
-    'command="/bin/ls",no-agent-forwarding,no-user-rc', 'random comment for this key', 'ed25516_with_command_2',
+    'command="/bin/ls",no-agent-forwarding,no-user-rc', 'random comment for this key', 'ed25519_with_command_2',
     ["strict", "loose"]
 ], [
     'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGODBKRjsFB/1v3pDRGpA6xR+QpOJg9vat0brlbUNDD random comment for this key', 256,
     'MD5:76:85:77:0d:24:6c:1e:d3:23:c4:29:92:80:f9:fb:94', 'SHA256:uG85B9hYCFenm0DxEo3PRzypYRY3kSa7veE/KbSSau0', None,
-    "random comment for this key", 'ed25516_with_command_3', ["strict", "loose"]
+    "random comment for this key", 'ed25519_with_command_3', ["strict", "loose"]
 ], [
     'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL5x8+1ucT6+AKQIW8u5W/FOuBvWx2fCQlSLkUakry89', 256,
-    'MD5:0c:4e:13:0f:f3:ab:20:58:85:2e:79:9b:0f:2b:43:c8', 'SHA256:2ao9ds3IIkmXiLPRMs/47HIkHIV/qxzEHKW8p9lhRYA', "ed25516_2",
+    'MD5:0c:4e:13:0f:f3:ab:20:58:85:2e:79:9b:0f:2b:43:c8', 'SHA256:2ao9ds3IIkmXiLPRMs/47HIkHIV/qxzEHKW8p9lhRYA', "ed25519_2",
     ["strict", "loose"]
 ], [
     'sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGdtNJ7nNTVW3kXvrWpvTENCfetzI2yUb8m5WLB2kcOVqF+3orTmloZsQEt1K386hlaqNzm7MVB+xcAiNoqhiI4AAAAEc3NoOg==',

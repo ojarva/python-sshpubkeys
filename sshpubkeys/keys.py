@@ -425,8 +425,8 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         self.ecdsa = _ECVerifyingKey(ecdsa_pubkey, hash_algorithm)
         return current_position
 
-    def _process_ed25516(self, data):
-        """Parses ed25516 keys.
+    def _process_ed25519(self, data):
+        """Parses ed25519 keys.
 
         There is no (apparent) way to validate ed25519 keys. This only
         checks data length (256 bits), but does not try to validate
@@ -465,7 +465,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
 
     def _process_sk_ed25519(self, data):
         """Parses sk_ed25519 public keys."""
-        current_position = self._process_ed25516(data)
+        current_position = self._process_ed25519(data)
         current_position, application = self._unpack_by_int(data, current_position)
         self._validate_application_string(application)
         return current_position
@@ -478,7 +478,7 @@ class SSHKey:  # pylint:disable=too-many-instance-attributes
         if self.key_type.strip().startswith(b"ecdsa-sha"):
             return self._process_ecdsa_sha(data)
         if self.key_type == b"ssh-ed25519":
-            return self._process_ed25516(data)
+            return self._process_ed25519(data)
         if self.key_type.strip().startswith(b"sk-ecdsa-sha"):
             return self._process_sk_ecdsa_sha(data)
         if self.key_type.strip().startswith(b"sk-ssh-ed25519"):

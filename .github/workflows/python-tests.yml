@@ -19,8 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pycodestyle isort pylint yapf
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install --upgrade pycodestyle isort pylint yapf pytest setuptools setuptools-scm wheel build
     - name: Check pycodestyle
       run: |
         pycodestyle --ignore E501,E402 --exclude=.git,dev3 sshpubkeys tests
@@ -29,7 +28,7 @@ jobs:
         pylint sshpubkeys tests
     - name: Run tests
       run: |
-        python3 setup.py test
+        pytest tests
     - name: Check formatting
       run: |
         isort --recursive sshpubkeys tests; yapf --recursive -i .

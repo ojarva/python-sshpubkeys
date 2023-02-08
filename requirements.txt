@@ -1,2 +1,2 @@
-cryptography==3.3.2
+cryptography==39.0.1
 yapf==0.21.0
